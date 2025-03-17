@@ -1,0 +1,117 @@
+/* Container styling */
+.container {
+    display: flex;
+    height: 100vh;
+    margin-left: 200px;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  
+  /* Content */
+  .content {
+    flex-grow: 1;
+    padding: 20px;
+    text-align: center;
+    max-width: 1200px;
+  }
+  
+  /* Title */
+  .title {
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+  
+  /* Filters */
+  .filters {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  /* Input & Select */
+  .input, .select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 150px;
+  }
+  
+  /* Button */
+  .button {
+    padding: 8px 16px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  /* Table */
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .table-row {
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .table-cell {
+    padding: 12px 20px;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+  
+  /* Enroll button */
+  .enroll-button {
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    background-color: #f8d7da;
+    color: #721c24;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 15px;
+  }
+  
+  .fingerprint-status-enrolled {
+    display: inline-block;
+    font-weight: bold;
+    padding: 4px 8px;
+    background-color: #d4edda; /* light green */
+    color: #155724;            /* dark green text */
+    border-radius: 4px;
+  }
+  
+  
+  /* Fingerprint status */
+  .fingerprint-status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    font-weight: bold;
+  }
+  
+  /* Modal */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 4px;
+    text-align: center;
+  }
+  

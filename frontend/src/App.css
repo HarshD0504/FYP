@@ -1,0 +1,21 @@
+/* For screens smaller than 768px */
+@media (max-width: 768px) {
+    .sidebar {
+      width: 100%;
+      height: 100%;
+      position: fixed;
+      top: 60px; /* Start below the header */
+      left: -100%; /* Initially hidden */
+      z-index: 999;
+      transition: left 0.3s ease-in-out;
+    }
+  
+    .sidebar.open {
+      left: 0; /* Show the sidebar when it's open */
+    }
+  
+    .sidebar-toggle-btn {
+      display: block; /* Show the hamburger icon on small screens */
+    }
+  }
+  
