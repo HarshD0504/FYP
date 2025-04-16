@@ -20,9 +20,9 @@ const StudentSidebar = () => {
             </Link>
           </li>
           <li style={styles.navLink}>
-            <Link to="/student/assignments" style={styles.link}>
+            <Link to="/student/classroom" style={styles.link}>
               <FaBook style={styles.icon} />
-              Assignments
+              Classroom
             </Link>
           </li>
           {/* <li style={styles.navLink}>
