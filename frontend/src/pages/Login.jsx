@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import supabase from "../supabase"  // Adjust path if needed
 import { Link, useNavigate } from "react-router-dom";
 import studentIcon from "../assets/student.png";
 import teacherIcon from "../assets/teacher.png";
@@ -10,21 +11,34 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+  e.preventDefault()
 
-    // Simulate successful login
-    alert(`Login Successful as ${userType}!`);
+  if (!emailOrPhone || !password) {
+    alert("Please enter both email and password.")
+    return
+  }
 
-    // Redirect to the respective dashboard based on userType
+  // Use Supabase to authenticate
+  const { error } = await supabase.auth.signInWithPassword({
+    email: emailOrPhone,
+    password: password,
+  })
+
+  if (error) {
+    alert(`Login failed: ${error.message}`)
+  } else {
+    alert(`Login Successful as ${userType}!`)
     if (userType === "Student") {
-      navigate("/student/home");
+      navigate("/student/home")
     } else if (userType === "Teacher") {
-      navigate("/teacher/home");
+      navigate("/teacher/home")
     } else if (userType === "Admin") {
-      navigate("/admin/home");
+      navigate("/admin/home")
     }
-  };
+  }
+}
+
 
   const handleUserTypeSelection = (type) => {
     setUserType(type); // Set the user type and proceed to the login form
