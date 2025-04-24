@@ -62,10 +62,10 @@ const styles = {
   },
   contentWrapper: {
     display: "flex",
-    justifyContent: "center",
-    gap: "1rem",
-    flexWrap: "wrap",
-    marginLeft: "100px"
+    flexDirection: "column",
+    alignItems: "center",
+    textAlign: "center",
+    marginTop: "1rem",
   },
   textContainer: {
     maxWidth: "600px",
@@ -101,6 +101,7 @@ const styles = {
     transition: "background-color 0.3s",
   },
   imageContainer: {
+    marginTop: "3rem",
     maxWidth: "500px",
     flexShrink: 0,
   },
