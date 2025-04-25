@@ -8,44 +8,52 @@ const SignUp = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState("student");
+  const [branch, setBranch] = useState("");
+  const [reg_id, setRegistrationId] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (password !== confirmPassword) {
-    alert("Passwords do not match");
-    return;
-  }
+    if (password !== confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
 
-  if (!phone) {
-    alert("Phone number is required");
-    return;
-  }
+    if (!phone) {
+      alert("Phone number is required");
+      return;
+    }
 
-  // Sign up with Supabase
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-  });
+    // Sign up with Supabase
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
 
-  if (error) {
-    alert(`Signup failed: ${error.message}`);
-    return;
-  }
+    if (error) {
+      alert(`Signup failed: ${error.message}`);
+      return;
+    }
 
-  // Add role & phone to 'profiles' table (create this table in Supabase)
-  const { error: profileError } = await supabase
-    .from("profiles")
-    .insert([{ id: data.user.id, role, phone }]);
+    // Add role, phone, branch, and registrationId to 'profiles' table
+    const { error: profileError } = await supabase.from("profiles").insert([
+      {
+        id: data.user.id,
+        role,
+        phone,
+        branch,
+        reg_id,
+      },
+    ]);
 
-  if (profileError) {
-    alert(`Signup succeeded, but saving profile failed: ${profileError.message}`);
-  } else {
-    alert("Sign Up Successful!");
-    navigate("/login");
-  }
-};
+    if (profileError) {
+      alert(`Signup succeeded, but saving profile failed: ${profileError.message}`);
+    } else {
+      alert("Sign Up Successful!");
+      navigate("/login");
+    }
+  };
 
   return (
     <div>
@@ -84,6 +92,24 @@ const SignUp = () => {
             required
             style={styles.input}
           />
+          <input
+            type="text"
+            placeholder="Registration ID"
+            value={reg_id}
+            onChange={(e) => setRegistrationId(e.target.value)}
+            required
+            style={styles.input}
+          />
+          <select
+            value={branch}
+            onChange={(e) => setBranch(e.target.value)}
+            required
+            style={styles.input}
+          >
+            <option value="">Select Branch</option>
+            <option value="EXTC">EXTC</option>
+            <option value="Electronics">Electronics</option>
+          </select>
           <div style={styles.radioContainer}>
             <label>
               <input
