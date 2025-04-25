@@ -114,7 +114,7 @@ function TeacherHomePage() {
                 </div>
                 <p>{cls.description}</p>
                 <Link
-                  to={`/teacher/classroom/class${cls.id}`}
+                  to={`/teacher/classroom/class/${cls.id}`}
                   state={{ name: cls.name, description: cls.description }}
                   className="class-link"
                 >
