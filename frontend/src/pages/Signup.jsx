@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import supabase from "../supabase"; // adjust path as needed
 import { Link, useNavigate } from "react-router-dom";
 
 const SignUp = () => {
@@ -9,25 +10,42 @@ const SignUp = () => {
   const [role, setRole] = useState("student");
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (password !== confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
+  if (password !== confirmPassword) {
+    alert("Passwords do not match");
+    return;
+  }
 
-    if (!phone) {
-      alert("Phone number is required");
-      return;
-    }
+  if (!phone) {
+    alert("Phone number is required");
+    return;
+  }
 
-    // Simulate a successful signup (skip backend logic)
+  // Sign up with Supabase
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+  });
+
+  if (error) {
+    alert(`Signup failed: ${error.message}`);
+    return;
+  }
+
+  // Add role & phone to 'profiles' table (create this table in Supabase)
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .insert([{ id: data.user.id, role, phone }]);
+
+  if (profileError) {
+    alert(`Signup succeeded, but saving profile failed: ${profileError.message}`);
+  } else {
     alert("Sign Up Successful!");
-
-    // Redirect to the login page after successful sign up
     navigate("/login");
-  };
+  }
+};
 
   return (
     <div>
