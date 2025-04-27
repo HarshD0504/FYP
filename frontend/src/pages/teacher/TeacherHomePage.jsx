@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 import supabase from "../../supabase";
-import "../../css/TeacherHomePage.css";
 import { Link } from "react-router-dom";
+import TeacherSidebar from "./TeacherSidebar";
 /*import ClassPage from "../ClassPage";
 import AssignmentPage from "../AssignmentPage" */
-
-
 
 
 function TeacherHomePage() {
@@ -78,10 +76,7 @@ function TeacherHomePage() {
 
   return (
     <div className="app-container">
-      <nav className="dashboard">
-        <h1 className="dashboard-title">Student Classroom</h1>
-        <button className="add-class" onClick={openModal}>+</button>
-      </nav>
+      <TeacherSidebar/>
 
       <div className="class-grid">
         {classes.map((cls) => (

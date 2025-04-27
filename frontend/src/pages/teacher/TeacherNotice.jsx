@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import supabase from "../../supabase"; // Import the existing Supabase client
 import { FaCalendarAlt, FaUserCircle } from "react-icons/fa";
+import TeacherSidebar from "./TeacherSidebar";
 
 const TeacherNotice = () => {
   const [announcements, setAnnouncements] = useState([]);
@@ -27,6 +28,7 @@ const TeacherNotice = () => {
 
   return (
     <div style={styles.container}>
+      <TeacherSidebar/>
       <h2 style={styles.heading}>Teacher Announcements</h2>
       <div style={styles.cardsContainer}>
         {announcements.length === 0 ? (
@@ -55,7 +57,6 @@ const TeacherNotice = () => {
 
 const styles = {
   container: {
-    padding: "20px",
     marginLeft: "240px", // Adjust the margin to leave space for the sidebar
   },
   heading: {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import supabase from "../../supabase";
-import "../../css/StudentHomePage.css";
 import { Link } from "react-router-dom";
+import StudentSidebar from "./StudentSidebar";
 
 function StudentHomePage() {
   const [classes, setClasses] = useState([]);
@@ -70,9 +70,7 @@ function StudentHomePage() {
 
   return (
     <div className="app-container">
-      <nav className="dashboard">
-        <h1 className="dashboard-title">Student Classroom</h1>
-      </nav>
+      <StudentSidebar/>
 
       <div className="class-grid">
         {classes.map((cls) => (
@@ -99,5 +97,73 @@ function StudentHomePage() {
     </div>
   );
 }
+
+const styles = {
+  appContainer: {
+    display: "flex",
+    minHeight: "100vh",
+    backgroundColor: "#f5f7fa",
+    paddingLeft: "220px", // Sidebar space
+    paddingTop: "30px",
+    paddingRight: "30px",
+  },
+  classGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+    gap: "30px",
+    width: "100%",
+    padding: "20px",
+  },
+  classCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: "12px",
+    boxShadow: "0 6px 12px rgba(0, 0, 0, 0.1)",
+    transition: "transform 0.2s, box-shadow 0.2s",
+    display: "flex",
+    flexDirection: "column",
+    cursor: "pointer",
+    overflow: "hidden",
+  },
+  classCardContent: {
+    display: "flex",
+    flexDirection: "column",
+    height: "100%",
+  },
+  classCardThumb: {
+    height: "150px",
+    backgroundColor: "#e0e0e0",
+    borderTopLeftRadius: "12px",
+    borderTopRightRadius: "12px",
+  },
+  classCardText: {
+    padding: "20px",
+    flexGrow: 1,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+  },
+  classCardHeader: {
+    marginBottom: "10px",
+  },
+  classTitle: {
+    fontSize: "1.4rem",
+    margin: 0,
+    color: "#333",
+  },
+  classDescription: {
+    flexGrow: 1,
+    fontSize: "0.95rem",
+    color: "#666",
+    marginBottom: "15px",
+  },
+  classLink: {
+    marginTop: "auto",
+    alignSelf: "flex-start",
+    color: "#4CAF50",
+    fontWeight: "bold",
+    textDecoration: "none",
+    fontSize: "0.95rem",
+  },
+};
 
 export default StudentHomePage;
