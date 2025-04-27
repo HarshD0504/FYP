@@ -1,8 +1,13 @@
+<<<<<<< Updated upstream
 import React, { useState, useEffect } from "react";
+=======
+import React, { useEffect, useState } from "react";
+>>>>>>> Stashed changes
 import AdminSidebar from "./AdminSidebar";
 import TeacherImage from "../../assets/teacher_icon.png"; 
 import StudentImage from "../../assets/group.png"; 
 import ClassImage from "../../assets/books.png"; 
+<<<<<<< Updated upstream
 import  supabase  from "../../supabase"; // Make sure you import your Supabase client
 
 const AdminHome = () => {
@@ -67,6 +72,52 @@ const AdminHome = () => {
     }
   };
 
+=======
+import supabase from "../../supabase"; // adjust if path is different
+
+const AdminHome = () => {
+  const [counts, setCounts] = useState({
+    teachers: 0,
+    students: 0,
+    courses: 0,
+  });
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      // Fetch teacher count
+      const { count: teacherCount, error: teacherError } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'teacher');
+
+      if (teacherError) console.error("Error fetching teacher count:", teacherError.message);
+
+      // Fetch student count
+      const { count: studentCount, error: studentError } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'student');
+
+      if (studentError) console.error("Error fetching student count:", studentError.message);
+
+      // Fetch courses count
+      const { count: courseCount, error: courseError } = await supabase
+        .from('classes')
+        .select('*', { count: 'exact', head: true });
+
+      if (courseError) console.error("Error fetching course count:", courseError.message);
+
+      setCounts({
+        teachers: teacherCount || 0,
+        students: studentCount || 0,
+        courses: courseCount || 0,
+      });
+    };
+
+    fetchCounts();
+  }, []);
+
+>>>>>>> Stashed changes
   return (
     <div style={styles.container}>
       <AdminSidebar />
@@ -76,17 +127,17 @@ const AdminHome = () => {
           <div style={styles.card}>
             <img src={TeacherImage} alt="Teachers" style={styles.cardImage} />
             <h3 style={styles.cardHeading}>Total Teachers:</h3>
-            <p style={styles.cardText}>120</p>
+            <p style={styles.cardText}>{counts.teachers}</p>
           </div>
           <div style={styles.card}>
             <img src={StudentImage} alt="Students" style={styles.cardImage} />
             <h3 style={styles.cardHeading}>Total Students:</h3>
-            <p style={styles.cardText}>950</p>
+            <p style={styles.cardText}>{counts.students}</p>
           </div>
           <div style={styles.card}>
             <img src={ClassImage} alt="Classes" style={styles.cardImage} />
             <h3 style={styles.cardHeading}>Total Courses:</h3>
-            <p style={styles.cardText}>30</p>
+            <p style={styles.cardText}>{counts.courses}</p>
           </div>
         </div>
 
@@ -185,6 +236,8 @@ const styles = {
   },
   cardText: {
     color: "#555",
+    fontSize: "1.2rem",
+    fontWeight: "bold",
   },
   addPostBox: {
     backgroundColor: "#ffffff",

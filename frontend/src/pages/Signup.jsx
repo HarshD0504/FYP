@@ -4,7 +4,7 @@ import supabase from "../supabase"; // Adjust path if needed
 import Header from "../components/Header";
 
 const SignUp = () => {
-  const [name, setName] = useState(""); // Added
+  const [name, setName] = useState(""); 
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -12,7 +12,10 @@ const SignUp = () => {
   const [role, setRole] = useState("student");
   const [branch, setBranch] = useState("");
   const [reg_id, setRegistrationId] = useState("");
+  const [year, setYear] = useState("");
   const navigate = useNavigate();
+
+  const isStudent = role === "student"; // NEW
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,12 +63,13 @@ const SignUp = () => {
       const { error: updateError } = await supabase
         .from("profiles")
         .update({
-          name, // Added
+          name,
           email,
           role,
           phone,
           branch,
           reg_id,
+          year,
         })
         .eq("id", userId);
 
@@ -79,12 +83,13 @@ const SignUp = () => {
         .insert([
           {
             id: userId,
-            name, // Added
+            name,
             email,
             role,
             phone,
             branch,
             reg_id,
+            year,
           },
         ]);
 
@@ -152,11 +157,30 @@ const SignUp = () => {
           style={styles.input}
         />
         <select
+          value={year}
+          onChange={(e) => setYear(e.target.value)}
+          required
+          style={{ ...styles.input, backgroundColor: !isStudent ? "#f0f0f0" : "white" }} // GREY background when disabled
+          disabled={!isStudent}
+        >
+          <option value="">Select Year</option>
+          <option value="1">1st</option>
+          <option value="2">2nd</option>
+          <option value="3">3rd</option>
+          <option value="4">4th</option>
+        </select>
+        <select
           value={branch}
           onChange={(e) => setBranch(e.target.value)}
+<<<<<<< Updated upstream
           required = {role ==="student"}
           disabled = {role !== "student"}
           style={{...styles.input, backgroundColor: role !== "student" ? "#eee" : "white",}}
+=======
+          required
+          style={{ ...styles.input, backgroundColor: !isStudent ? "#f0f0f0" : "white" }} // GREY background when disabled
+          disabled={!isStudent}
+>>>>>>> Stashed changes
         >
           <option value="">Select Branch</option>
           <option value="EXTC">EXTC</option>
