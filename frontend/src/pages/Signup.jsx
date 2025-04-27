@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import supabase from "../supabase"; // Adjust path if needed
+import Header from "../components/Header";
 
 const SignUp = () => {
   const [name, setName] = useState(""); // Added
@@ -99,6 +100,7 @@ const SignUp = () => {
 
   return (
     <main style={styles.container}>
+      <Header/>
       <h2 style={styles.heading}>Sign Up</h2>
       <form onSubmit={handleSubmit} style={styles.form}>
         <input
@@ -199,6 +201,7 @@ const SignUp = () => {
           Log In
         </Link>
       </p>
+      <Footer/>
     </main>
   );
 };

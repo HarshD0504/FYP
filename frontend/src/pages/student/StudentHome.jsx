@@ -162,14 +162,13 @@ const StudentHome = () => {
 const styles = {
   container: {
     display: "flex",
-    height: "100vh",
     marginLeft: "200px",
     alignItems: "flex-start",
     justifyContent: "center",
   },
   content: {
     flexGrow: 1,
-    paddingBottom: "80px",
+    paddingBottom: "30px",
     textAlign: "center",
     maxWidth: "1100px",
   },
@@ -191,6 +190,7 @@ const styles = {
     width: "90%",
   },
   assignmentCard: {
+    padding: "10px",
     backgroundColor: "#fff",
     borderRadius: "8px",
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",

@@ -30,15 +30,10 @@ import TeacherAssignmentPage from "./pages/teacher/TeacherAssignmentPage";
 import TeacherClassPage from "./pages/teacher/TeacherClassPage";
 
 
-
-
-
-
 const App = () => {
   return (
     <Router>
       <div style={styles.appContainer}>
-        <Header />
         <main style={styles.mainContent}>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -75,7 +70,6 @@ const App = () => {
 
           </Routes>
         </main>
-        <Footer />
       </div>
     </Router>
   );
@@ -90,7 +84,7 @@ const styles = {
   mainContent: {
     flex: 1,
     padding: "1rem",
-    marginTop: "8vh", // Adds space equal to the header height
+    marginTop: "2vh", // Adds space equal to the header height
   },
 };
 

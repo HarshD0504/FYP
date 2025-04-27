@@ -1,6 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom"; // Importing useNavigate from react-router-dom
 import BgImage from "../assets/bg-group.png"; // Importing the image from the assets folder
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 const Home = () => {
   const navigate = useNavigate(); // Initialize the navigate function
@@ -15,12 +17,11 @@ const Home = () => {
 
   return (
     <main style={styles.container}>
+      <Header />
       <h2 style={styles.heading}>Welcome to the Student Management System</h2>
       <div style={styles.contentWrapper}>
         {/* Main text content */}
-        
         <div style={styles.textContainer}>
-          
           <p style={styles.description}>
             This system allows students to record attendance via fingerprint, access their profiles, and view performance. Teachers and administrators can manage student data and monitor attendance.
           </p>
@@ -50,39 +51,44 @@ const Home = () => {
           />
         </div>
       </div>
+      <Footer />
     </main>
   );
 };
 
 const styles = {
   container: {
-    padding: "3rem",
+    padding: "6rem",
     textAlign: "center",
-    
+    fontFamily: "'Roboto', sans-serif", // Standard font for better readability
   },
   contentWrapper: {
     display: "flex",
-    flexDirection: "column",
+    flexDirection: "row", // Change to row for side-by-side layout
+    justifyContent: "center",
     alignItems: "center",
-    textAlign: "center",
     marginTop: "1rem",
   },
   textContainer: {
     maxWidth: "600px",
-    textAlign: "center",
+    textAlign: "left", // Align text to the left for better readability
+    marginRight: "3rem", // Add space between text and image
   },
   heading: {
-    fontSize: "2rem",
+    fontSize: "1.8rem", // Slightly larger for better emphasis
     color: "#4CAF50",
+    fontWeight: "600",
   },
   description: {
-    fontSize: "1.3rem",
+    fontSize: "1.2rem", // Slightly larger font for description
     color: "#333",
+    lineHeight: "1.6",
   },
   extraContent: {
-    fontSize: "1.3rem",
+    fontSize: "1.2rem",
     color: "#555",
     marginTop: "2rem",
+    lineHeight: "1.6",
   },
   buttonContainer: {
     marginTop: "3rem",
@@ -91,8 +97,8 @@ const styles = {
     justifyContent: "center",
   },
   button: {
-    padding: "10px 20px",
-    fontSize: "1rem",
+    padding: "12px 24px",
+    fontSize: "1.1rem", // Slightly larger button text
     backgroundColor: "#4CAF50",
     color: "#fff",
     border: "none",
@@ -101,12 +107,12 @@ const styles = {
     transition: "background-color 0.3s",
   },
   imageContainer: {
-    marginTop: "3rem",
     maxWidth: "500px",
     flexShrink: 0,
   },
   image: {
     height: "330px",
+    width: "auto", // Ensure the image maintains its aspect ratio
   },
 };
 

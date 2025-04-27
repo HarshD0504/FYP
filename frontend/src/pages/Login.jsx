@@ -4,6 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import studentIcon from "../assets/student.png";
 import teacherIcon from "../assets/teacher.png";
 import adminIcon from "../assets/admin.png";
+import Footer from "../components/Footer";
+import Header from "../components/Header";
 
 const Login = () => {
   const [userType, setUserType] = useState(""); // Track selected user type
@@ -46,6 +48,7 @@ const Login = () => {
 
   return (
     <div>
+      <Header/>
       <main style={styles.container}>
         <h2 style={styles.heading}>Login</h2>
 
@@ -126,6 +129,7 @@ const Login = () => {
             </p>
           </div>
         )}
+        <Footer/>
       </main>
     </div>
   );
@@ -133,11 +137,11 @@ const Login = () => {
 
 const styles = {
   container: {
-    padding: "2rem",
+    padding: "6rem",
     textAlign: "center",
   },
   heading: {
-    fontSize: "2rem",
+    fontSize: "1.8rem",
     color: "#4CAF50",
   },
   subheading: {

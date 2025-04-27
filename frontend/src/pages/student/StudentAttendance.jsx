@@ -130,7 +130,7 @@ const styles = {
     maxWidth: "1100px",
   },
   heading: {
-    marginBottom: "20px",
+    marginBottom: "30px",
     color: "#333",
   },
   cardsContainer: {
