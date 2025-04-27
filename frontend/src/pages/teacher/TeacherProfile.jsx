@@ -1,21 +1,64 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import TeacherSidebar from "./TeacherSidebar";
-import profileImage from "../../assets/profile.png"; // Replace this with the actual path to your image
+import profileImage from "../../assets/profile.png"; 
+import supabase from "../../supabase"; // adjust if needed
 
 const TeacherProfile = () => {
-  // Dummy Teacher data
-  const teacher = {
-    name: "John Doe",
-    id: "STU12345",
-    email: "john.doe@example.com",
-    // program: "B.Tech - Computer Science",
-    courses: [
-      { code: "MATH101", name: "Mathematics" },
-      { code: "PHYS102", name: "Physics" },
-      { code: "CHEM103", name: "Chemistry" },
-    ],
-    fingerprintEnrolled: false, // Change to true to simulate enrolled status
-  };
+  const [teacher, setTeacher] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate("/login");
+        return;
+      }
+
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching profile:", error.message);
+        navigate("/login");
+        return;
+      }
+
+      if (profile.role !== "teacher") {
+        // if role is not teacher, redirect to their correct page
+        if (profile.role === "student") {
+          navigate("/studentprofile");
+        } else if (profile.role === "admin") {
+          navigate("/adminprofile");
+        } else {
+          navigate("/login"); // fallback
+        }
+        return;
+      }
+
+      setTeacher({
+        name: profile.name,
+        id: profile.reg_id,
+        email: profile.email,
+        courses: [
+          { code: "MATH101", name: "Mathematics" },
+          { code: "PHYS102", name: "Physics" },
+          { code: "CHEM103", name: "Chemistry" },
+        ],
+        fingerprintEnrolled: false,
+      });
+      setLoading(false);
+    };
+
+    fetchProfile();
+  }, [navigate]);
+
+  if (loading) return <div>Loading...</div>;
 
   return (
     <div style={styles.container}>
@@ -23,7 +66,7 @@ const TeacherProfile = () => {
       <div style={styles.content}>
         <h1 style={styles.heading}>TEACHER PROFILE</h1>
         <div style={styles.profileContainer}>
-          {/* Left Side: Teacher Details */}
+          {/* Left Side */}
           <div style={styles.details}>
             <div style={styles.detailBox}>
               <strong>Name:</strong> {teacher.name}
@@ -34,9 +77,7 @@ const TeacherProfile = () => {
             <div style={styles.detailBox}>
               <strong>Email:</strong> {teacher.email}
             </div>
-            {/* <div style={styles.detailBox}>
-              <strong>Program:</strong> {teacher.program}
-            </div> */}
+
             <div style={styles.fingerprintStatus}>
               <strong>Fingerprint Status:</strong>{" "}
               {teacher.fingerprintEnrolled ? (
@@ -53,7 +94,7 @@ const TeacherProfile = () => {
                 </span>
               )}
             </div>
-            
+
             <div style={styles.tableContainer}>
               <h3 style={styles.subheading}>COURSES</h3>
               <table style={styles.table}>
@@ -75,7 +116,7 @@ const TeacherProfile = () => {
             </div>
           </div>
 
-          {/* Right Side: Profile Picture */}
+          {/* Right Side */}
           <div style={styles.profilePictureContainer}>
             <img
               src={profileImage}
@@ -99,7 +140,7 @@ const styles = {
   },
   content: {
     flexGrow: 1,
-    paddingBottom: "50px", // Space for the footer
+    paddingBottom: "50px",
     maxWidth: "1000px",
   },
   heading: {
@@ -189,3 +230,4 @@ const styles = {
 };
 
 export default TeacherProfile;
+
