@@ -154,8 +154,9 @@ const SignUp = () => {
         <select
           value={branch}
           onChange={(e) => setBranch(e.target.value)}
-          required
-          style={styles.input}
+          required = {role ==="student"}
+          disabled = {role !== "student"}
+          style={{...styles.input, backgroundColor: role !== "student" ? "#eee" : "white",}}
         >
           <option value="">Select Branch</option>
           <option value="EXTC">EXTC</option>
