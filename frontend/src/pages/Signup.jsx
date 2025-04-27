@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import supabase from "../supabase"; // Adjust path if needed
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 const SignUp = () => {
   const [name, setName] = useState(""); 
@@ -170,22 +171,20 @@ const SignUp = () => {
           <option value="4">4th</option>
         </select>
         <select
-          value={branch}
-          onChange={(e) => setBranch(e.target.value)}
-<<<<<<< Updated upstream
-          required = {role ==="student"}
-          disabled = {role !== "student"}
-          style={{...styles.input, backgroundColor: role !== "student" ? "#eee" : "white",}}
-=======
-          required
-          style={{ ...styles.input, backgroundColor: !isStudent ? "#f0f0f0" : "white" }} // GREY background when disabled
-          disabled={!isStudent}
->>>>>>> Stashed changes
-        >
-          <option value="">Select Branch</option>
-          <option value="EXTC">EXTC</option>
-          <option value="Electronics">Electronics</option>
-        </select>
+  value={branch}
+  onChange={(e) => setBranch(e.target.value)}
+  required={role === "student"}
+  disabled={role !== "student"}
+  style={{
+    ...styles.input,
+    backgroundColor: role !== "student" ? "#eee" : "white",
+  }}
+>
+  <option value="">Select Branch</option>
+  <option value="EXTC">EXTC</option>
+  <option value="Electronics">Electronics</option>
+</select>
+
         <div style={styles.radioContainer}>
           <label>
             <input
