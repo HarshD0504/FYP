@@ -1,21 +1,59 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import TeacherSidebar from "./TeacherSidebar";
 import timetableImage from "../../assets/timetable_electronics.png";
+import supabase from "../../supabase"; // adjust if needed
 
 const TeacherHome = () => {
-  const teacherSubjects = [
-    { courseName: "Mathematics", code: "MATH101", year: "1st", classroom: "A101" },
-    { courseName: "Physics", code: "PHY202", year: "2nd", classroom: "B202" },
-    { courseName: "Chemistry", code: "CHEM303", year: "3rd", classroom: "C303" },
-    { courseName: "Biology", code: "BIO404", year: "4th", classroom: "D404" },
-    { courseName: "Computer Science", code: "CS505", year: "4th", classroom: "E505" },
-  ];
-
-  const notifications = [
+  const [teacherCourses, setTeacherCourses] = useState([]); // To store the courses
+  const [loading, setLoading] = useState(true);
+  const [notifications] = useState([
     "Staff meeting scheduled for Monday at 10:00 AM.",
     "Submit grades by the end of the week.",
     "Updated timetable available now.",
-  ];
+  ]);
+
+  useEffect(() => {
+    const fetchTeacherCourses = async () => {
+      // Get the authenticated user
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        // If no user is found, navigate to login
+        navigate("/login");
+        return;
+      }
+
+      // Fetch the teacher's profile based on user ID to get the reg_id
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("reg_id")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError || !profile) {
+        console.error("Error fetching profile:", profileError?.message);
+        return;
+      }
+
+      // Fetch the courses assigned to the teacher based on their reg_id
+      const { data: courses, error: coursesError } = await supabase
+        .from("classes")
+        .select("name, description, branch, year")
+        .eq("reg_id", profile.reg_id);
+
+      if (coursesError) {
+        console.error("Error fetching courses:", coursesError?.message);
+        return;
+      }
+
+      setTeacherCourses(courses);
+      setLoading(false);
+    };
+
+    fetchTeacherCourses();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
 
   return (
     <div style={styles.container}>
@@ -26,16 +64,20 @@ const TeacherHome = () => {
           <div style={styles.card}>
             <h3>MY SUBJECTS</h3>
             <div style={styles.subjectList}>
-              {teacherSubjects.map((subject, index) => (
-                <div key={index} style={styles.subjectItem}>
-                  <p style={styles.subjectText}>
-                    <strong>{subject.courseName}</strong> ({subject.code})
-                  </p>
-                  <p style={styles.subjectDetails}>
-                    Year: {subject.year} | Classroom: {subject.classroom}
-                  </p>
-                </div>
-              ))}
+              {teacherCourses.length > 0 ? (
+                teacherCourses.map((course, index) => (
+                  <div key={index} style={styles.subjectItem}>
+                    <p style={styles.subjectText}>
+                      <strong>{course.name}</strong> ({course.description}) {/* course.description is the course code */}
+                    </p>
+                    <p style={styles.subjectDetails}>
+                      Year: {course.year} | Branch: {course.branch}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p>No courses assigned</p>
+              )}
             </div>
           </div>
 
@@ -148,3 +190,4 @@ const styles = {
 };
 
 export default TeacherHome;
+

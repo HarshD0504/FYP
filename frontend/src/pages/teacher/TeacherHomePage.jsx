@@ -2,9 +2,6 @@ import { useEffect, useState } from "react";
 import supabase from "../../supabase";
 import { Link } from "react-router-dom";
 import TeacherSidebar from "./TeacherSidebar";
-/*import ClassPage from "../ClassPage";
-import AssignmentPage from "../AssignmentPage" */
-
 
 function TeacherHomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -12,26 +9,60 @@ function TeacherHomePage() {
   const [classCode, setClassCode] = useState("");
   const [className, setClassName] = useState("");
   const [activeOptionsId, setActiveOptionsId] = useState(null);
+  const [teacherRegId, setTeacherRegId] = useState(null);
 
-  const fetchClasses = async () => {
-    const { data, error } = await supabase.from("classes").select("*");
+  const fetchClasses = async (regId) => {
+    const { data, error } = await supabase
+      .from("classes")
+      .select("*")
+      .eq("reg_id", regId);
     if (error) console.error("Error fetching classes:", error);
     else setClasses(data);
   };
 
   useEffect(() => {
-    fetchClasses();
+    const fetchTeacherData = async () => {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) {
+        console.error("Error fetching user:", userError.message);
+        return;
+      }
+
+      if (!user) {
+        console.error("No user logged in.");
+        return;
+      }
+
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("reg_id")
+        .eq("email", user.email)
+        .single();
+
+      if (profileError) {
+        console.error("Error fetching profile:", profileError.message);
+        return;
+      }
+
+      setTeacherRegId(profileData.reg_id);
+      fetchClasses(profileData.reg_id);
+    };
+
+    fetchTeacherData();
+
     const subscription = supabase
       .channel("classes_realtime")
-      .on("postgres_changes", { event: "*", schema: "public", table: "classes" }, () => {
-        fetchClasses();
+      .on("postgres_changes", { event: "*", schema: "public", table: "classes" }, (payload) => {
+        if (teacherRegId) {
+          fetchClasses(teacherRegId);
+        }
       })
       .subscribe();
 
     return () => {
       supabase.removeChannel(subscription);
     };
-  }, []);
+  }, [teacherRegId]);
 
   const openModal = () => setIsModalOpen(true);
 
@@ -42,10 +73,10 @@ function TeacherHomePage() {
   };
 
   const addClass = async () => {
-    if (classCode.trim() && className.trim()) {
+    if (classCode.trim() && className.trim() && teacherRegId) {
       const { data, error } = await supabase
         .from("classes")
-        .insert([{ name: className, description: classCode }])
+        .insert([{ name: className, description: classCode, reg_id: teacherRegId }])
         .select();
 
       if (error) {

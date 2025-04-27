@@ -1,15 +1,53 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import TeacherSidebar from "./TeacherSidebar";
+import supabase from "../../supabase"; // adjust import if needed
 
 const TeacherAttendance = () => {
-  // Mock data for courses
-  const courses = [
-    { courseName: "Mathematics", courseCode: "MATH101", department: "Science", year: "1st Year" },
-    { courseName: "Physics", courseCode: "PHY102", department: "Science", year: "2nd Year" },
-    { courseName: "Computer Science", courseCode: "CS301", department: "Engineering", year: "3rd Year" },
-    { courseName: "Chemistry", courseCode: "CHEM201", department: "Science", year: "2nd Year" },
-    { courseName: "English Literature", courseCode: "ENG401", department: "Arts", year: "4th Year" },
-  ];
+  const [teacherCourses, setTeacherCourses] = useState([]); // Store courses assigned to the teacher
+  const [loading, setLoading] = useState(true); // Loading state
+
+  useEffect(() => {
+    const fetchTeacherCourses = async () => {
+      // Get the authenticated user
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        // If no user is found, navigate to login
+        navigate("/login");
+        return;
+      }
+
+      // Fetch the teacher's profile based on user ID to get the reg_id
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("reg_id")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError || !profile) {
+        console.error("Error fetching profile:", profileError?.message);
+        return;
+      }
+
+      // Fetch the courses assigned to the teacher based on their reg_id
+      const { data: courses, error: coursesError } = await supabase
+        .from("classes")
+        .select("name, description, year, branch") // Fetch course name, description (code), year, and branch
+        .eq("reg_id", profile.reg_id);
+
+      if (coursesError) {
+        console.error("Error fetching courses:", coursesError?.message);
+        return;
+      }
+
+      setTeacherCourses(courses);
+      setLoading(false);
+    };
+
+    fetchTeacherCourses();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
 
   return (
     <div style={styles.container}>
@@ -17,20 +55,24 @@ const TeacherAttendance = () => {
       <div style={styles.content}>
         <h2 style={styles.heading}>ATTENDANCE DATA</h2>
         <div style={styles.cardGrid}>
-          {courses.map((course, index) => (
-            <div key={index} style={styles.card}>
-              <h4 style={styles.cardTitle}>{course.courseName}</h4>
-              <p style={styles.courseCode}>Code: {course.courseCode}</p>
-              <p style={styles.details}>Department: {course.department}</p>
-              <p style={styles.details}>Year: {course.year}</p>
-              <button
-                style={styles.button}
-                onClick={() => (window.location.href = "/teacher/attendance-report")}
-              >
-                View Attendance Report
-              </button>
-            </div>
-          ))}
+          {teacherCourses.length > 0 ? (
+            teacherCourses.map((course, index) => (
+              <div key={index} style={styles.card}>
+                <h4 style={styles.cardTitle}>{course.name}</h4> {/* Course Name */}
+                <p style={styles.courseCode}>Code: {course.description}</p> {/* Course Code */}
+                <p style={styles.details}>Branch: {course.branch}</p> {/* Course Branch */}
+                <p style={styles.details}>Year: {course.year}</p> {/* Course Year */}
+                <button
+                  style={styles.button}
+                  onClick={() => (window.location.href = "/teacher/attendance-report")}
+                >
+                  View Attendance Report
+                </button>
+              </div>
+            ))
+          ) : (
+            <p>No courses assigned</p>
+          )}
         </div>
       </div>
     </div>
@@ -92,3 +134,4 @@ const styles = {
 };
 
 export default TeacherAttendance;
+

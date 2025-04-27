@@ -10,53 +10,66 @@ const TeacherProfile = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+  const fetchProfile = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    // Fetch teacher profile
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError) {
+      console.error("Error fetching profile:", profileError.message);
+      navigate("/login");
+      return;
+    }
+
+    if (profile.role !== "teacher") {
+      if (profile.role === "student") {
+        navigate("/studentprofile");
+      } else if (profile.role === "admin") {
+        navigate("/adminprofile");
+      } else {
         navigate("/login");
-        return;
       }
+      return;
+    }
 
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
+    // Fetch courses assigned to this teacher using reg_id
+    const { data: coursesData, error: coursesError } = await supabase
+      .from("classes")
+      .select("name, description")
+      .eq("reg_id", profile.reg_id);
 
-      if (error) {
-        console.error("Error fetching profile:", error.message);
-        navigate("/login");
-        return;
-      }
+    if (coursesError) {
+      console.error("Error fetching courses:", coursesError.message);
+    }
 
-      if (profile.role !== "teacher") {
-        // if role is not teacher, redirect to their correct page
-        if (profile.role === "student") {
-          navigate("/studentprofile");
-        } else if (profile.role === "admin") {
-          navigate("/adminprofile");
-        } else {
-          navigate("/login"); // fallback
-        }
-        return;
-      }
+    const courses = coursesData?.map((course) => ({
+      code: course.description,
+      name: course.name,
+    })) || [];
 
-      setTeacher({
-        name: profile.name,
-        id: profile.reg_id,
-        email: profile.email,
-        courses: [
-          { code: "MATH101", name: "Mathematics" },
-          { code: "PHYS102", name: "Physics" },
-          { code: "CHEM103", name: "Chemistry" },
-        ],
-        fingerprintEnrolled: false,
-      });
-      setLoading(false);
-    };
+    setTeacher({
+      name: profile.name,
+      id: profile.reg_id,
+      email: profile.email,
+      courses: courses,
+      fingerprintEnrolled: false,
+    });
 
-    fetchProfile();
-  }, [navigate]);
+    setLoading(false);
+  };
+
+  fetchProfile();
+}, [navigate]);
+
 
   if (loading) return <div>Loading...</div>;
 
