@@ -1,6 +1,6 @@
 import React from "react";
 import TeacherSidebar from "./TeacherSidebar";
-import timetableImage from "../../assets/timetable.png";
+import timetableImage from "../../assets/timetable_electronics.png";
 
 const TeacherHome = () => {
   const teacherSubjects = [

@@ -1,9 +1,39 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import StudentSidebar from "./StudentSidebar";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import timetableImage from "../../assets/timetable.png"; // Import the timetable image
+import supabase from "../../supabase"; // <-- Import supabase
+import timetableExtc from "../../assets/timetable_extc.jpg"; // <-- Your EXTC timetable
+import timetableElectronics from "../../assets/timetable_electronics.png"; // <-- Your Electronics timetable
 
 const StudentHome = () => {
+  const [branch, setBranch] = useState(null);
+
+  useEffect(() => {
+    const fetchBranch = async () => {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        alert("Error fetching user. Please login again.");
+        return;
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("branch")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError || !profile) {
+        alert("Error fetching profile. Please complete signup.");
+        return;
+      }
+
+      setBranch(profile.branch?.toLowerCase()); // make sure it's lowercase
+    };
+
+    fetchBranch();
+  }, []);
+
   // Mock data for attendance pie chart
   const attendanceData = [
     { name: "Attended", value: 75, color: "#4CAF50" },
@@ -15,10 +45,9 @@ const StudentHome = () => {
     { id: 1, subject: "Mathematics", dueDate: "2025-01-30T23:59:59" },
     { id: 2, subject: "Physics", dueDate: "2025-02-02T18:00:00" },
     { id: 3, subject: "Computer Science", dueDate: "2025-02-05T12:00:00" },
-    { id: 4, subject: "Chemistry", dueDate: "2025-01-24T23:59:59" }, // Example for today's submission
+    { id: 4, subject: "Chemistry", dueDate: "2025-01-24T23:59:59" },
   ];
 
-  // Function to calculate time left
   const calculateTimeLeft = (dueDate) => {
     const now = new Date();
     const due = new Date(dueDate);
@@ -34,6 +63,12 @@ const StudentHome = () => {
     if (hours > 0) return `${hours} hrs left`;
     return "Few hrs left";
   };
+
+  if (!branch) {
+    return <div>Loading...</div>; // or a nice spinner
+  }
+
+  const timetableImage = branch === "extc" ? timetableExtc : timetableElectronics;
 
   return (
     <div style={styles.container}>
@@ -123,6 +158,7 @@ const StudentHome = () => {
   );
 };
 
+// Styles same as before
 const styles = {
   container: {
     display: "flex",
@@ -133,7 +169,7 @@ const styles = {
   },
   content: {
     flexGrow: 1,
-    paddingBottom: "80px", // Space for the footer
+    paddingBottom: "80px",
     textAlign: "center",
     maxWidth: "1100px",
   },
@@ -192,3 +228,4 @@ const styles = {
 };
 
 export default StudentHome;
+

@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import supabase from "../supabase"; // Adjust path if needed
 
 const SignUp = () => {
+  const [name, setName] = useState(""); // Added
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -12,96 +13,102 @@ const SignUp = () => {
   const [reg_id, setRegistrationId] = useState("");
   const navigate = useNavigate();
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  if (password !== confirmPassword) {
-    alert("Passwords do not match");
-    return;
-  }
-
-  if (!phone) {
-    alert("Phone number is required");
-    return;
-  }
-
-  // 1. Sign Up
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-  });
-
-  if (error) {
-    alert(`Signup failed: ${error.message}`);
-    return;
-  }
-
-  const user = data?.user;
-  if (!user) {
-    alert("Signup succeeded, but no user data returned. Check email verification.");
-    return;
-  }
-
-  const userId = user.id;
-
-  // 2. Insert or Update Profile
-  const { data: existingProfile, error: fetchError } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .single();
-
-  if (fetchError && fetchError.code !== "PGRST116") {
-    alert(`Profile check failed: ${fetchError.message}`);
-    return;
-  }
-
-  if (existingProfile) {
-    // UPDATE profile if it already exists
-    const { error: updateError } = await supabase
-      .from("profiles")
-      .update({
-        email,
-        role,
-        phone,
-        branch,
-        reg_id,
-      })
-      .eq("id", userId);
-
-    if (updateError) {
-      alert(`Profile update failed: ${updateError.message}`);
+    if (password !== confirmPassword) {
+      alert("Passwords do not match");
       return;
     }
-  } else {
-    // INSERT profile if it doesn't exist
-    const { error: insertError } = await supabase
+
+    if (!phone) {
+      alert("Phone number is required");
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error) {
+      alert(`Signup failed: ${error.message}`);
+      return;
+    }
+
+    const user = data?.user;
+    if (!user) {
+      alert("Signup succeeded, but no user data returned. Check email verification.");
+      return;
+    }
+
+    const userId = user.id;
+
+    const { data: existingProfile, error: fetchError } = await supabase
       .from("profiles")
-      .insert([
-        {
-          id: userId,
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    if (fetchError && fetchError.code !== "PGRST116") {
+      alert(`Profile check failed: ${fetchError.message}`);
+      return;
+    }
+
+    if (existingProfile) {
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({
+          name, // Added
           email,
           role,
           phone,
           branch,
           reg_id,
-        },
-      ]);
+        })
+        .eq("id", userId);
 
-    if (insertError) {
-      alert(`Profile saving failed: ${insertError.message}`);
-      return;
+      if (updateError) {
+        alert(`Profile update failed: ${updateError.message}`);
+        return;
+      }
+    } else {
+      const { error: insertError } = await supabase
+        .from("profiles")
+        .insert([
+          {
+            id: userId,
+            name, // Added
+            email,
+            role,
+            phone,
+            branch,
+            reg_id,
+          },
+        ]);
+
+      if (insertError) {
+        alert(`Profile saving failed: ${insertError.message}`);
+        return;
+      }
     }
-  }
 
-  alert("Signup and profile saving successful!");
-  navigate("/login");
-};
+    alert("Signup and profile saving successful!");
+    navigate("/login");
+  };
 
   return (
     <main style={styles.container}>
       <h2 style={styles.heading}>Sign Up</h2>
       <form onSubmit={handleSubmit} style={styles.form}>
+        <input
+          type="text"
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          style={styles.input}
+        />
         <input
           type="email"
           placeholder="Email"
@@ -221,4 +228,3 @@ const styles = {
 };
 
 export default SignUp;
-

@@ -1,23 +1,57 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import StudentSidebar from "./StudentSidebar";
-import profileImage from "../../assets/profile.png"; // Replace this with the actual path to your image
+import supabase from "../../supabase";
+import profileImage from "../../assets/profile.png";
 
 const StudentProfile = () => {
-  // Dummy student data
-  const student = {
-    name: "John Doe",
-    id: "STU12345",
-    email: "john.doe@example.com",
-    program: "B.Tech - Computer Science",
-    courses: [
-      { code: "MATH101", name: "Mathematics" },
-      { code: "PHYS102", name: "Physics" },
-      { code: "CHEM103", name: "Chemistry" },
-      { code: "CS104", name: "Computer Science" },
-      { code: "BIO105", name: "Biology" },
-    ],
-    fingerprintEnrolled: false, // Change to true to simulate enrolled status
-  };
+  const [student, setStudent] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        alert("Error fetching user. Please login again.");
+        navigate("/login");
+        return;
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError || !profile) {
+        alert("Error fetching profile. Please complete signup.");
+        navigate("/signup");
+        return;
+      }
+
+      if (profile.role !== "student") {
+        alert("Unauthorized. Not a student account.");
+        navigate("/");
+        return;
+      }
+
+      setStudent({
+        name: profile.name || "No Name",
+        id: profile.reg_id || "N/A",
+        email: profile.email,
+        branch: profile.branch || "N/A",
+        fingerprintEnrolled: false, // default until fingerprint feature
+        courses: [], // you can fetch enrolled courses later
+      });
+    };
+
+    fetchProfile();
+  }, [navigate]);
+
+  if (!student) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div style={styles.container}>
@@ -37,7 +71,7 @@ const StudentProfile = () => {
               <strong>Email:</strong> {student.email}
             </div>
             <div style={styles.detailBox}>
-              <strong>Program:</strong> {student.program}
+              <strong>Branch:</strong> {student.branch}
             </div>
             <div style={styles.fingerprintStatus}>
               <strong>Fingerprint Status:</strong>{" "}
@@ -55,7 +89,9 @@ const StudentProfile = () => {
                 </span>
               )}
             </div>
-            
+
+            {/* Optional: Courses table if you have */}
+            {/* 
             <div style={styles.tableContainer}>
               <h3 style={styles.subheading}>COURSES</h3>
               <table style={styles.table}>
@@ -75,6 +111,7 @@ const StudentProfile = () => {
                 </tbody>
               </table>
             </div>
+            */}
           </div>
 
           {/* Right Side: Profile Picture */}
@@ -101,7 +138,7 @@ const styles = {
   },
   content: {
     flexGrow: 1,
-    paddingBottom: "50px", // Space for the footer
+    paddingBottom: "50px",
     maxWidth: "1000px",
   },
   heading: {
@@ -152,28 +189,6 @@ const styles = {
     borderRadius: "4px",
     cursor: "pointer",
   },
-  subheading: {
-    fontSize: "1.2rem",
-    marginBottom: "10px",
-    color: "#333",
-  },
-  tableContainer: {
-    marginTop: "30px",
-  },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    textAlign: "left",
-  },
-  tableHeader: {
-    borderBottom: "2px solid #ddd",
-    padding: "10px",
-    backgroundColor: "#f4f4f4",
-  },
-  tableCell: {
-    borderBottom: "1px solid #ddd",
-    padding: "8px",
-  },
   profilePictureContainer: {
     width: "150px",
     height: "150px",
@@ -191,3 +206,4 @@ const styles = {
 };
 
 export default StudentProfile;
+
