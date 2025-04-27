@@ -1,7 +1,6 @@
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import supabase from "../../supabase";
-import "../../css/StudentClassPage.css";
 
 function StudentClassPage() {
   const { id } = useParams();

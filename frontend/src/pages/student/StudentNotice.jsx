@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import supabase from "../../supabase"; // Import the existing Supabase client
 import { FaCalendarAlt, FaUserCircle } from "react-icons/fa";
+import StudentSidebar from "./StudentSidebar";
 
 const StudentNotice = () => {
   const [announcements, setAnnouncements] = useState([]);
@@ -27,6 +28,7 @@ const StudentNotice = () => {
 
   return (
     <div style={styles.container}>
+      <StudentSidebar/>
       <h2 style={styles.heading}>Announcements</h2>
       <div style={styles.cardsContainer}>
         {announcements.length === 0 ? (

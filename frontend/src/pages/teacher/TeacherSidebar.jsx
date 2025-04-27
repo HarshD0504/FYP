@@ -67,7 +67,7 @@ const styles = {
     width: '220px',
     backgroundColor: '#2c3e50',
     color: '#ecf0f1',
-    paddingTop: '100px',
+    paddingTop: '30px',
     position: 'fixed',
     top: 0,
     left: 0,
