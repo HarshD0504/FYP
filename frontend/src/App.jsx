@@ -17,8 +17,9 @@ import StudentAttendance from "./pages/student/StudentAttendance";
 import StudentProfile from "./pages/student/StudentProfile";
 import StudentContact from "./pages/student/StudentContact";
 import StudentHomePage from "./pages/student/StudentHomePage";
-import StudentAssignmentPage from "./pages/student/StudentAssignmentPage"
-import StudentClassPage from "./pages/student/StudentClassPage"
+import StudentAssignmentPage from "./pages/student/StudentAssignmentPage";
+import StudentClassPage from "./pages/student/StudentClassPage";
+import StudentNotice from "./pages/student/StudentNotice";
 
 
 import TeacherHome from "./pages/teacher/TeacherHome";
@@ -28,7 +29,7 @@ import TeacherProfile from "./pages/teacher/TeacherProfile";
 import TeacherHomePage from "./pages/teacher/TeacherHomePage";
 import TeacherAssignmentPage from "./pages/teacher/TeacherAssignmentPage";
 import TeacherClassPage from "./pages/teacher/TeacherClassPage";
-
+import TeacherNotice from "./pages/teacher/TeacherNotice";
 
 
 
@@ -58,13 +59,13 @@ const App = () => {
             <Route path="/student/attendance" element={<StudentAttendance />} />
             <Route path="/student/profile" element={<StudentProfile />} />
             <Route path="/student/contact" element={<StudentContact />} />
+            <Route path="/student/notices" element={<StudentNotice />} />
             
             <Route path="/teacher/home" element={<TeacherHome />} />
             <Route path="/teacher/attendance" element={<TeacherAttendance />} />
             <Route path="/teacher/assignment" element={<TeacherAssignment />} />
             <Route path="/teacher/profile" element={<TeacherProfile />} />
-
-
+            <Route path="/teacher/notices" element={<TeacherNotice />} />
             <Route path="/teacher/classroom" element={<TeacherHomePage />} />
             <Route path="/teacher/classroom/class/:id" element={<TeacherClassPage />} />
             <Route path="/teacher/classroom/assignment/:id" element={<TeacherAssignmentPage />} />

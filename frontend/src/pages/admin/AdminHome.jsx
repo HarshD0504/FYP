@@ -1,10 +1,72 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import AdminSidebar from "./AdminSidebar";
 import TeacherImage from "../../assets/teacher_icon.png"; 
 import StudentImage from "../../assets/group.png"; 
 import ClassImage from "../../assets/books.png"; 
+import  supabase  from "../../supabase"; // Make sure you import your Supabase client
 
 const AdminHome = () => {
+  const [announcementText, setAnnouncementText] = useState("");
+  const [audience, setAudience] = useState(""); // 'teachers', 'students', or 'both'
+  const [regId, setRegId] = useState(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('reg_id')
+        .eq('id', (await supabase.auth.getUser()).data.user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+      } else {
+        setRegId(data.reg_id);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handlePostAnnouncement = async () => {
+    if (!announcementText || !audience) {
+      alert("Please enter the announcement and select audience.");
+      return;
+    }
+
+    let typeValue = 0;
+    let receiverValue = 0;
+
+    if (audience === "teachers") {
+      typeValue = 3;   // admin to teacher
+      receiverValue = 2;
+    } else if (audience === "students") {
+      typeValue = 4;   // admin to student
+      receiverValue = 1;
+    } else if (audience === "both") {
+      typeValue = 8;   // admin to broadcast all
+      receiverValue = 3;
+    }
+
+    const { data, error } = await supabase.from('announcements').insert([
+      {
+        announcement_msg: announcementText,
+        type: typeValue,
+        sender: regId,
+        receiver: receiverValue,
+      }
+    ]);
+
+    if (error) {
+      console.error("Error posting announcement:", error);
+      alert("Failed to post announcement.");
+    } else {
+      alert("Announcement posted successfully!");
+      setAnnouncementText("");
+      setAudience("");
+    }
+  };
+
   return (
     <div style={styles.container}>
       <AdminSidebar />
@@ -34,47 +96,53 @@ const AdminHome = () => {
           <textarea
             style={styles.textArea}
             placeholder="Write your announcement here..."
+            value={announcementText}
+            onChange={(e) => setAnnouncementText(e.target.value)}
           />
           <div style={styles.options}>
             {/* Target Audience */}
             <div style={styles.optionGroup}>
               <label>Target Audience:</label>
               <div>
-                <input type="radio" id="teachers" name="audience" />
+                <input
+                  type="radio"
+                  id="teachers"
+                  name="audience"
+                  value="teachers"
+                  checked={audience === "teachers"}
+                  onChange={(e) => setAudience(e.target.value)}
+                />
                 <label htmlFor="teachers">Teachers</label>
-                <input type="radio" id="students" name="audience" />
+
+                <input
+                  type="radio"
+                  id="students"
+                  name="audience"
+                  value="students"
+                  checked={audience === "students"}
+                  onChange={(e) => setAudience(e.target.value)}
+                  style={{ marginLeft: "10px" }}
+                />
                 <label htmlFor="students">Students</label>
-                <input type="radio" id="both" name="audience" />
+
+                <input
+                  type="radio"
+                  id="both"
+                  name="audience"
+                  value="both"
+                  checked={audience === "both"}
+                  onChange={(e) => setAudience(e.target.value)}
+                  style={{ marginLeft: "10px" }}
+                />
                 <label htmlFor="both">Both</label>
               </div>
-            </div>
-
-            {/* Department Selection */}
-            <div style={styles.optionGroup}>
-              <label>Department:</label>
-              <select style={styles.selectBox}>
-                <option value="cs">CS</option>
-                <option value="it">IT</option>
-                <option value="extc">EXTC</option>
-                <option value="ec">EC</option>
-                <option value="eee">EEE</option>
-              </select>
-            </div>
-
-            {/* Year Selection */}
-            <div style={styles.optionGroup}>
-              <label>Year:</label>
-              <select style={styles.selectBox}>
-                <option value="first">First Year</option>
-                <option value="second">Second Year</option>
-                <option value="third">Third Year</option>
-                <option value="last">Last Year</option>
-              </select>
             </div>
           </div>
 
           {/* Post Button */}
-          <button style={styles.postButton}>Post Announcement</button>
+          <button style={styles.postButton} onClick={handlePostAnnouncement}>
+            Post Announcement
+          </button>
         </div>
       </div>
     </div>
@@ -120,14 +188,14 @@ const styles = {
   },
   addPostBox: {
     backgroundColor: "#ffffff",
-    padding: "15px", // Reduced padding to make gap smaller
+    padding: "15px",
     borderRadius: "12px",
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
     maxWidth: "600px",
     margin: "0 auto",
   },
   announcementHeading: {
-    marginTop: "0", // Reduced gap from top
+    marginTop: "0",
     marginBottom: "10px",
     color: "#333",
   },
@@ -148,11 +216,6 @@ const styles = {
   optionGroup: {
     display: "flex",
     flexDirection: "column",
-  },
-  selectBox: {
-    padding: "8px",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
   },
   postButton: {
     backgroundColor: "#4caf50",
