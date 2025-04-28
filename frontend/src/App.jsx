@@ -21,7 +21,7 @@ import StudentAssignmentPage from "./pages/student/StudentAssignmentPage";
 import StudentClassPage from "./pages/student/StudentClassPage";
 import StudentNotice from "./pages/student/StudentNotice";
 
-
+import TeacherContactPage from "./pages/teacher/TeacherContact";
 import TeacherHome from "./pages/teacher/TeacherHome";
 import TeacherAttendance from "./pages/teacher/TeacherAttendance";
 import TeacherAssignment from "./pages/teacher/TeacherAssignment";
@@ -59,6 +59,7 @@ const App = () => {
             <Route path="/teacher/home" element={<TeacherHome />} />
             <Route path="/teacher/attendance" element={<TeacherAttendance />} />
             <Route path="/teacher/assignment" element={<TeacherAssignment />} />
+            <Route path="/teacher/contact" element={<TeacherContactPage />} />
             <Route path="/teacher/profile" element={<TeacherProfile />} />
             <Route path="/teacher/notices" element={<TeacherNotice />} />
             <Route path="/teacher/classroom" element={<TeacherHomePage />} />

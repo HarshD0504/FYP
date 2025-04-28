@@ -13,7 +13,7 @@ const StudentNotice = () => {
         const { data, error } = await supabase
           .from("announcements")
           .select("announcement_msg, created_at, sender, receiver")
-          .in("receiver", [1,3]) // Filter by receiver 1 (admin to students)
+          .in("receiver", [1,3,7]) // Filter by receiver 1 (admin to students)
           .order("created_at", { ascending: false }); // Sort by latest announcements
 
         if (error) throw error;
@@ -29,7 +29,7 @@ const StudentNotice = () => {
   return (
     <div style={styles.container}>
       <StudentSidebar/>
-      <h2 style={styles.heading}>Announcements</h2>
+      {/*<h2 style={styles.heading}>Announcements</h2>*/}
       <div style={styles.cardsContainer}>
         {announcements.length === 0 ? (
           <p>No announcements available.</p>
@@ -44,7 +44,7 @@ const StudentNotice = () => {
                 </p>
                 <p style={styles.footerText}>
                   <FaUserCircle style={styles.icon} />
-                  Posted by: Admin
+                  Posted by: {announcement.sender}
                 </p>
               </div>
             </div>
@@ -79,7 +79,7 @@ const styles = {
     flexDirection: "column",
     justifyContent: "space-between",
     width: "100%",
-    maxWidth: "600px",
+    maxWidth: "1200px",
     margin: "0 auto",
   },
   announcement: {
