@@ -59,6 +59,17 @@ const TeacherProfile = () => {
         courses: courses,
         fingerprintEnrolled: false,
       });
+
+      if (profile.image) {
+        const { data } = supabase
+          .storage
+          .from('images')
+          .getPublicUrl(profile.image);
+
+        if (data?.publicUrl) {
+          setProfilePicUrl(data.publicUrl);
+        }
+      }
     };
 
     fetchProfile();
@@ -94,7 +105,7 @@ const TeacherProfile = () => {
 
       await supabase
         .from('profiles')
-        .update({ image_path: filePath })
+        .update({ image: filePath })
         .eq('id', teacher.id);
     }
   };
@@ -297,6 +308,7 @@ const styles = {
 };
 
 export default TeacherProfile;
+
 
 
 

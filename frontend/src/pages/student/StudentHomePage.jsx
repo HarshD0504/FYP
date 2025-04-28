@@ -6,9 +6,10 @@ import StudentSidebar from "./StudentSidebar";
 function StudentHomePage() {
   const [classes, setClasses] = useState([]);
   const [userBranch, setUserBranch] = useState(null);
+  const [userYear, setUserYear] = useState(null);
 
-  // Step 1: Fetch the logged-in student's branch
-  const fetchUserBranch = async () => {
+  // Step 1: Fetch the logged-in student's branch and year
+  const fetchUserProfile = async () => {
     const { data: user, error: userError } = await supabase.auth.getUser();
     if (userError) {
       console.error("Error fetching user:", userError);
@@ -17,7 +18,7 @@ function StudentHomePage() {
 
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("branch")
+      .select("branch, year")
       .eq("email", user?.user?.email)  // using email to match profile
       .single(); // because only one profile per user
 
@@ -27,14 +28,16 @@ function StudentHomePage() {
     }
 
     setUserBranch(profile.branch);
+    setUserYear(profile.year); // assuming 'year' exists in the profile table
   };
 
-  // Step 2: Fetch classes for the user's branch
-  const fetchClasses = async (branch) => {
+  // Step 2: Fetch classes for the user's branch and year
+  const fetchClasses = async (branch, year) => {
     const { data, error } = await supabase
       .from("classes")
       .select("*")
-      .eq("branch", branch); // only classes with matching branch
+      .eq("branch", branch)  // filter by branch
+      .eq("year", year);     // filter by year
 
     if (error) console.error("Error fetching classes:", error);
     else setClasses(data);
@@ -42,14 +45,14 @@ function StudentHomePage() {
 
   useEffect(() => {
     const init = async () => {
-      await fetchUserBranch();
+      await fetchUserProfile();
     };
     init();
   }, []);
 
   useEffect(() => {
-    if (userBranch) {
-      fetchClasses(userBranch);
+    if (userBranch && userYear) {
+      fetchClasses(userBranch, userYear);
 
       const subscription = supabase
         .channel("classes_realtime")
@@ -57,7 +60,7 @@ function StudentHomePage() {
           "postgres_changes",
           { event: "*", schema: "public", table: "classes" },
           () => {
-            fetchClasses(userBranch);
+            fetchClasses(userBranch, userYear);
           }
         )
         .subscribe();
@@ -66,7 +69,7 @@ function StudentHomePage() {
         supabase.removeChannel(subscription);
       };
     }
-  }, [userBranch]);
+  }, [userBranch, userYear]);
 
   return (
     <div className="app-container">
@@ -167,3 +170,4 @@ const styles = {
 };
 
 export default StudentHomePage;
+

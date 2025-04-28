@@ -44,15 +44,17 @@ const StudentProfile = () => {
         reg_id: profile.reg_id || "N/A",
         email: profile.email,
         branch: profile.branch || "N/A",
+        year: profile.year,
         fingerprintEnrolled: false,
         courses: [],
       });
 
-      if (profile.image_path) {
+      // Check and set profile picture if exists
+      if (profile.image) {
         const { data } = supabase
           .storage
           .from('images')
-          .getPublicUrl(profile.image_path);
+          .getPublicUrl(profile.image);
 
         if (data?.publicUrl) {
           setProfilePicUrl(data.publicUrl);
@@ -93,7 +95,7 @@ const StudentProfile = () => {
 
       await supabase
         .from('profiles')
-        .update({ image_path: filePath })
+        .update({ image: filePath })
         .eq('id', student.id);
     }
   };
@@ -125,6 +127,9 @@ const StudentProfile = () => {
             </div>
             <div style={styles.detailBox}>
               <strong>Branch:</strong> {student.branch}
+            </div>
+            <div style={styles.detailBox}>
+              <strong>Year:</strong> {student.year}
             </div>
             <div style={styles.fingerprintStatus}>
               <strong>Fingerprint Status:</strong>{" "}
@@ -244,17 +249,18 @@ const styles = {
     borderRadius: "50%",
   },
   uploadButton: {
-  padding: "4px 8px",
-  backgroundColor: "#4CAF50",
-  color: "white",
-  border: "none",
-  borderRadius: "4px",
-  fontSize: "0.8rem",
-  cursor: "pointer",
-},
+    padding: "4px 8px",
+    backgroundColor: "#4CAF50",
+    color: "white",
+    border: "none",
+    borderRadius: "4px",
+    fontSize: "0.8rem",
+    cursor: "pointer",
+  },
 };
 
 export default StudentProfile;
+
 
 
 
