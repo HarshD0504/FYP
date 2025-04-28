@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import StudentSidebar from "./StudentSidebar";
 import supabase from "../../supabase";
-import profileImage from "../../assets/profile.png";
+import defaultProfileImage from "../../assets/profile.png";
 
 const StudentProfile = () => {
   const [student, setStudent] = useState(null);
+  const [profilePicUrl, setProfilePicUrl] = useState(null);
+  const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,17 +39,68 @@ const StudentProfile = () => {
       }
 
       setStudent({
+        id: user.id,
         name: profile.name || "No Name",
-        id: profile.reg_id || "N/A",
+        reg_id: profile.reg_id || "N/A",
         email: profile.email,
         branch: profile.branch || "N/A",
-        fingerprintEnrolled: false, // default until fingerprint feature
-        courses: [], // you can fetch enrolled courses later
+        fingerprintEnrolled: false,
+        courses: [],
       });
+
+      if (profile.image_path) {
+        const { data } = supabase
+          .storage
+          .from('images')
+          .getPublicUrl(profile.image_path);
+
+        if (data?.publicUrl) {
+          setProfilePicUrl(data.publicUrl);
+        }
+      }
     };
 
     fetchProfile();
   }, [navigate]);
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file || !student) return;
+
+    const fileExt = file.name.split('.').pop();
+    const filePath = `${student.id}.${fileExt}`;
+
+    const { error: uploadError } = await supabase
+      .storage
+      .from('images')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: true,
+      });
+
+    if (uploadError) {
+      alert('Error uploading image.');
+      return;
+    }
+
+    const { data } = supabase
+      .storage
+      .from('images')
+      .getPublicUrl(filePath);
+
+    if (data?.publicUrl) {
+      setProfilePicUrl(data.publicUrl);
+
+      await supabase
+        .from('profiles')
+        .update({ image_path: filePath })
+        .eq('id', student.id);
+    }
+  };
+
+  const handleButtonClick = () => {
+    fileInputRef.current.click();
+  };
 
   if (!student) {
     return <div>Loading...</div>;
@@ -65,7 +118,7 @@ const StudentProfile = () => {
               <strong>Name:</strong> {student.name}
             </div>
             <div style={styles.detailBox}>
-              <strong>ID:</strong> {student.id}
+              <strong>ID:</strong> {student.reg_id}
             </div>
             <div style={styles.detailBox}>
               <strong>Email:</strong> {student.email}
@@ -89,37 +142,24 @@ const StudentProfile = () => {
                 </span>
               )}
             </div>
-
-            {/* Optional: Courses table if you have */}
-            {/* 
-            <div style={styles.tableContainer}>
-              <h3 style={styles.subheading}>COURSES</h3>
-              <table style={styles.table}>
-                <thead>
-                  <tr>
-                    <th style={styles.tableHeader}>Course Code</th>
-                    <th style={styles.tableHeader}>Course Name</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {student.courses.map((course, index) => (
-                    <tr key={index}>
-                      <td style={styles.tableCell}>{course.code}</td>
-                      <td style={styles.tableCell}>{course.name}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            */}
           </div>
 
           {/* Right Side: Profile Picture */}
-          <div style={styles.profilePictureContainer}>
+          <div style={styles.profilePictureWrapper}>
             <img
-              src={profileImage}
+              src={profilePicUrl || defaultProfileImage}
               alt="Student Profile"
               style={styles.profilePicture}
+            />
+            <button style={styles.uploadButton} onClick={handleButtonClick}>
+              Change Profile Picture
+            </button>
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleImageUpload}
             />
           </div>
         </div>
@@ -189,21 +229,33 @@ const styles = {
     borderRadius: "4px",
     cursor: "pointer",
   },
-  profilePictureContainer: {
+  profilePictureWrapper: {
     width: "150px",
-    height: "150px",
-    border: "1px solid #ddd",
-    borderRadius: "50%",
-    overflow: "hidden",
-    textAlign: "center",
-    backgroundColor: "#fff",
+    height: "200px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "10px",
   },
   profilePicture: {
-    width: "100%",
-    height: "100%",
+    width: "150px",
+    height: "150px",
     objectFit: "cover",
+    borderRadius: "50%",
   },
+  uploadButton: {
+  padding: "4px 8px",
+  backgroundColor: "#4CAF50",
+  color: "white",
+  border: "none",
+  borderRadius: "4px",
+  fontSize: "0.8rem",
+  cursor: "pointer",
+},
 };
 
 export default StudentProfile;
+
+
+
 

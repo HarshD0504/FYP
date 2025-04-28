@@ -1,77 +1,111 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import TeacherSidebar from "./TeacherSidebar";
-import profileImage from "../../assets/profile.png"; 
-import supabase from "../../supabase"; // adjust if needed
+import profileImage from "../../assets/profile.png";
+import supabase from "../../supabase";
 
 const TeacherProfile = () => {
   const [teacher, setTeacher] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [profilePicUrl, setProfilePicUrl] = useState(null);
+  const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-  const fetchProfile = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-
-    // Fetch teacher profile
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
-
-    if (profileError) {
-      console.error("Error fetching profile:", profileError.message);
-      navigate("/login");
-      return;
-    }
-
-    if (profile.role !== "teacher") {
-      if (profile.role === "student") {
-        navigate("/studentprofile");
-      } else if (profile.role === "admin") {
-        navigate("/adminprofile");
-      } else {
+    const fetchProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
         navigate("/login");
+        return;
       }
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError) {
+        console.error("Error fetching profile:", profileError.message);
+        navigate("/login");
+        return;
+      }
+
+      if (profile.role !== "teacher") {
+        if (profile.role === "student") {
+          navigate("/studentprofile");
+        } else if (profile.role === "admin") {
+          navigate("/adminprofile");
+        } else {
+          navigate("/login");
+        }
+        return;
+      }
+
+      const { data: coursesData } = await supabase
+        .from("classes")
+        .select("name, description")
+        .eq("reg_id", profile.reg_id);
+
+      const courses = coursesData?.map((course) => ({
+        code: course.description,
+        name: course.name,
+      })) || [];
+
+      setTeacher({
+        name: profile.name,
+        id: profile.reg_id,
+        email: profile.email,
+        imageUrl: profile.image || "", // <- FETCH the uploaded image
+        courses: courses,
+        fingerprintEnrolled: false,
+      });
+    };
+
+    fetchProfile();
+  }, [navigate]);
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file || !teacher) return;
+
+    const fileExt = file.name.split('.').pop();
+    const filePath = `${teacher.id}.${fileExt}`;
+
+    const { error: uploadError } = await supabase
+      .storage
+      .from('images')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: true,
+      });
+
+    if (uploadError) {
+      alert('Error uploading image.');
       return;
     }
 
-    // Fetch courses assigned to this teacher using reg_id
-    const { data: coursesData, error: coursesError } = await supabase
-      .from("classes")
-      .select("name, description")
-      .eq("reg_id", profile.reg_id);
+    const { data } = supabase
+      .storage
+      .from('images')
+      .getPublicUrl(filePath);
 
-    if (coursesError) {
-      console.error("Error fetching courses:", coursesError.message);
+    if (data?.publicUrl) {
+      setProfilePicUrl(data.publicUrl);
+
+      await supabase
+        .from('profiles')
+        .update({ image_path: filePath })
+        .eq('id', teacher.id);
     }
-
-    const courses = coursesData?.map((course) => ({
-      code: course.description,
-      name: course.name,
-    })) || [];
-
-    setTeacher({
-      name: profile.name,
-      id: profile.reg_id,
-      email: profile.email,
-      courses: courses,
-      fingerprintEnrolled: false,
-    });
-
-    setLoading(false);
   };
 
-  fetchProfile();
-}, [navigate]);
+  const handleButtonClick = () => {
+    fileInputRef.current.click();
+  };
 
-
-  if (loading) return <div>Loading...</div>;
+  if (!teacher) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div style={styles.container}>
@@ -79,7 +113,7 @@ const TeacherProfile = () => {
       <div style={styles.content}>
         <h1 style={styles.heading}>TEACHER PROFILE</h1>
         <div style={styles.profileContainer}>
-          {/* Left Side */}
+          {/* Left Side: Teacher Details */}
           <div style={styles.details}>
             <div style={styles.detailBox}>
               <strong>Name:</strong> {teacher.name}
@@ -108,6 +142,7 @@ const TeacherProfile = () => {
               )}
             </div>
 
+            {/* Courses */}
             <div style={styles.tableContainer}>
               <h3 style={styles.subheading}>COURSES</h3>
               <table style={styles.table}>
@@ -129,12 +164,22 @@ const TeacherProfile = () => {
             </div>
           </div>
 
-          {/* Right Side */}
-          <div style={styles.profilePictureContainer}>
+          {/* Right Side: Profile Picture */}
+          <div style={styles.profilePictureWrapper}>
             <img
-              src={profileImage}
+              src={profilePicUrl || teacher.imageUrl || profileImage}
               alt="Teacher Profile"
               style={styles.profilePicture}
+            />
+            <button style={styles.uploadButton} onClick={handleButtonClick}>
+              Change Profile Picture
+            </button>
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleImageUpload}
             />
           </div>
         </div>
@@ -226,21 +271,33 @@ const styles = {
     borderBottom: "1px solid #ddd",
     padding: "8px",
   },
-  profilePictureContainer: {
+  profilePictureWrapper: {
     width: "150px",
-    height: "150px",
-    border: "1px solid #ddd",
-    borderRadius: "50%",
-    overflow: "hidden",
-    textAlign: "center",
-    backgroundColor: "#fff",
+    height: "200px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "10px",
   },
   profilePicture: {
-    width: "100%",
-    height: "100%",
+    width: "150px",
+    height: "150px",
     objectFit: "cover",
+    borderRadius: "50%",
+  },
+  uploadButton: {
+    padding: "4px 8px",
+    backgroundColor: "#4CAF50",
+    color: "white",
+    border: "none",
+    borderRadius: "4px",
+    fontSize: "0.8rem",
+    cursor: "pointer",
   },
 };
 
 export default TeacherProfile;
+
+
+
 
