@@ -13,7 +13,7 @@ const StudentNotice = () => {
         const { data, error } = await supabase
           .from("announcements")
           .select("announcement_msg, created_at, sender, receiver")
-          .eq("receiver", [1,3]) // Filter by receiver 1 (admin to students)
+          .in("receiver", [1,3]) // Filter by receiver 1 (admin to students)
           .order("created_at", { ascending: false }); // Sort by latest announcements
 
         if (error) throw error;
