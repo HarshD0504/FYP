@@ -1,20 +1,98 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import StudentSidebar from "./StudentSidebar";
+import supabase from "../../supabase"; // assuming your supabase client is here
 
 const ContactPage = () => {
-  // State for form handling
   const [recipient, setRecipient] = useState("admin"); // Default: admin
   const [message, setMessage] = useState("");
   const [teacher, setTeacher] = useState("");
-  const [department, setDepartment] = useState("");
+  const [regId, setRegId] = useState(null);
 
-  const handleSend = () => {
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data: userData, error } = await supabase.auth.getUser();
+      if (error || !userData?.user) {
+        console.error("User not logged in");
+        return;
+      }
+
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("reg_id")
+        .eq("id", userData.user.id)
+        .single();
+
+      if (profileError) {
+        console.error("Error fetching profile:", profileError.message);
+        return;
+      }
+
+      setRegId(profileData.reg_id);
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handleSend = async () => {
+    if (!message.trim()) {
+      alert("Please enter a message before sending.");
+      return;
+    }
+
+    if (!regId) {
+      alert("User profile not loaded yet. Please try again in a few seconds.");
+      return;
+    }
+
+    let receiverId = null;
+
     if (recipient === "admin") {
-      alert(`Message sent to Admin: ${message}`);
-    } else if (recipient === "teacher" && teacher && department) {
-      alert(`Message sent to ${teacher} (${department}): ${message}`);
-    } else {
-      alert("Please fill all fields before sending the message.");
+      receiverId = 4; // 4 for admin
+    } else if (recipient === "teacher") {
+      if (!teacher.trim()) {
+        alert("Please enter the teacher's name.");
+        return;
+      }
+
+      const { data: teacherProfiles, error } = await supabase
+        .from("profiles")
+        .select("id, name, role")
+        .eq("role", "teacher")
+        .ilike("name", `%${teacher}%`);
+
+      if (error) {
+        console.error("Error fetching teacher profiles:", error.message);
+        return;
+      }
+
+      if (!teacherProfiles || teacherProfiles.length === 0) {
+        alert("Teacher not found. Please check the name.");
+        return;
+      }
+
+      receiverId = 5; // 5 for teacher
+    }
+
+    try {
+      const { error: insertError } = await supabase.from("announcements").insert([
+        {
+          announcement_msg: message,
+          sender: regId, // student's reg_id
+          receiver: receiverId,
+        },
+      ]);
+
+      if (insertError) {
+        console.error("Error sending message:", insertError.message);
+        return;
+      }
+
+      alert("Message sent successfully!");
+      setMessage("");
+      setTeacher("");
+      setRecipient("admin");
+    } catch (error) {
+      console.error("Error sending message:", error.message);
     }
   };
 
@@ -24,7 +102,6 @@ const ContactPage = () => {
       <div style={styles.content}>
         <h1 style={styles.heading}>CONTACT US</h1>
         <div style={styles.form}>
-          {/* Message Input */}
           <textarea
             style={styles.textarea}
             rows="5"
@@ -33,7 +110,6 @@ const ContactPage = () => {
             onChange={(e) => setMessage(e.target.value)}
           ></textarea>
 
-          {/* Recipient Options */}
           <div style={styles.options}>
             <label>
               <input
@@ -57,7 +133,6 @@ const ContactPage = () => {
             </label>
           </div>
 
-          {/* Teacher Details (conditional) */}
           {recipient === "teacher" && (
             <div style={styles.teacherOptions}>
               <input
@@ -67,17 +142,9 @@ const ContactPage = () => {
                 value={teacher}
                 onChange={(e) => setTeacher(e.target.value)}
               />
-              <input
-                style={styles.input}
-                type="text"
-                placeholder="Department"
-                value={department}
-                onChange={(e) => setDepartment(e.target.value)}
-              />
             </div>
           )}
 
-          {/* Send Button */}
           <button style={styles.sendButton} onClick={handleSend}>
             Send
           </button>
@@ -97,7 +164,7 @@ const styles = {
   },
   content: {
     flexGrow: 1,
-    paddingBottom: "50px", // Space for the footer
+    paddingBottom: "50px",
     textAlign: "center",
     maxWidth: "700px",
   },
