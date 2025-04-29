@@ -18,6 +18,7 @@ function StudentClassPage() {
         content: assignment.content,
         fileUrl: assignment.file_url,
         due_date: assignment.due_date,
+        course_code: assignment.course_code,
       },
     });
   };
