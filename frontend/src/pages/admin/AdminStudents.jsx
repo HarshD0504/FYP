@@ -1,108 +1,54 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import AdminSidebar from "./AdminSidebar";
 import supabase from "../../supabase";
 import "../../css/DataTable.css";
 
-const EnrollButton = ({ studentId, fingerprintStatus, onEnroll }) => {
-  const handleClick = () => {
-    if (fingerprintStatus === "Not Enrolled") {
-      onEnroll(studentId);
-    }
-  };
-
-  return fingerprintStatus === "Not Enrolled" ? (
-    <button className="enroll-button" onClick={handleClick}>
-      {fingerprintStatus}
-    </button>
-  ) : (
-    <span className="fingerprint-status-enrolled">
-      {fingerprintStatus}
-    </span>
-  );
-};
-
 const AdminStudents = () => {
   const [filters, setFilters] = useState({
     name: "",
-    department: "",
+    branch: "",
     year: "",
     fingerprintStatus: "",
   });
-
-  const [showTable, setShowTable] = useState(false);
   const [studentsData, setStudentsData] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
-  const [currentStudentId, setCurrentStudentId] = useState(null);
+  const [showTable, setShowTable] = useState(false);
 
-  useEffect(() => {
-    const fetchStudents = async () => {
-      const { data, error } = await supabase.from("students").select("*");
-      if (error) {
-        console.error("Error fetching students:", error.message);
-      } else {
-        const formattedData = data.map((student) => ({
-          ...student,
-          fingerprintStatus: student.fingerprintStatus ? "Enrolled" : "Not Enrolled",
-        }));
-        setStudentsData(formattedData);
-      }
-    };
-    fetchStudents();
-  }, []);
+  const handleSearch = async () => {
+    let query = supabase
+      .from("profiles")
+      .select("reg_id, name, branch, year, email, fing_id")
+      .eq("role", "student");
 
-  const handleSearch = () => {
-    setShowTable(true);
+    if (filters.name) {
+      query = query.ilike("name", `%${filters.name}%`);
+    }
+    if (filters.branch) {
+      query = query.eq("branch", filters.branch);
+    }
+    if (filters.year) {
+      query = query.eq("year", filters.year);
+    }
+    if (filters.fingerprintStatus === "Enrolled") {
+      query = query.not("fing_id", "is", null);
+    } else if (filters.fingerprintStatus === "Not Enrolled") {
+      query = query.is("fing_id", null);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Error fetching students:", error.message);
+      setStudentsData([]);
+      setShowTable(false);
+    } else {
+      const formatted = data.map((student) => ({
+        ...student,
+        fingerprintStatus: student.fing_id ? "Enrolled" : "Not Enrolled",
+      }));
+      setStudentsData(formatted);
+      setShowTable(true);
+    }
   };
-
-  const handleEnroll = async (studentId) => {
-    setCurrentStudentId(studentId);
-    setShowModal(true);
-    setModalMessage("Connecting to device - Please wait");
-
-    setTimeout(() => {
-      setModalMessage("Device connected, scanning in progress");
-    }, 3000);
-
-    setTimeout(async () => {
-      const { error } = await supabase
-        .from("students")
-        .update({ fingerprintStatus: true })
-        .eq("id", studentId);
-
-      if (error) {
-        console.error("Error updating fingerprint status:", error.message);
-        setModalMessage("Enrollment failed");
-      } else {
-        setStudentsData((prevStudents) =>
-          prevStudents.map((student) =>
-            student.id === studentId
-              ? { ...student, fingerprintStatus: "Enrolled" }
-              : student
-          )
-        );
-        setModalMessage("Enrolled successfully");
-      }
-
-      setTimeout(() => {
-        setShowModal(false);
-      }, 2000);
-    }, 6000);
-  };
-
-  const filteredStudents = studentsData.filter((student) => {
-    const matchesName =
-      filters.name === "" ||
-      student.name.toLowerCase().includes(filters.name.toLowerCase());
-    const matchesDepartment =
-      filters.department === "" || student.department === filters.department;
-    const matchesYear = filters.year === "" || student.year === filters.year;
-    const matchesFingerprint =
-      filters.fingerprintStatus === "" ||
-      student.fingerprintStatus === filters.fingerprintStatus;
-
-    return matchesName && matchesDepartment && matchesYear && matchesFingerprint;
-  });
 
   return (
     <div className="container">
@@ -115,42 +61,34 @@ const AdminStudents = () => {
             placeholder="Student Name"
             className="input"
             value={filters.name}
-            onChange={(e) =>
-              setFilters((prev) => ({ ...prev, name: e.target.value }))
-            }
+            onChange={(e) => setFilters({ ...filters, name: e.target.value })}
           />
           <select
             className="select"
-            value={filters.department}
-            onChange={(e) =>
-              setFilters((prev) => ({ ...prev, department: e.target.value }))
-            }
+            value={filters.branch}
+            onChange={(e) => setFilters({ ...filters, branch: e.target.value })}
           >
-            <option value="">Select Department</option>
-            <option value="Computer Science">Computer Science</option>
-            <option value="Electrical Engineering">Electrical Engineering</option>
-            <option value="Mechanical Engineering">Mechanical Engineering</option>
+            <option value="">Select Branch</option>
+            <option value="Electronics">Electronics</option>
+            <option value="EXTC">EXTC</option>
+            {/* Add more branches if needed */}
           </select>
           <select
             className="select"
             value={filters.year}
-            onChange={(e) =>
-              setFilters((prev) => ({ ...prev, year: e.target.value }))
-            }
+            onChange={(e) => setFilters({ ...filters, year: e.target.value })}
           >
             <option value="">Select Year</option>
-            <option value="First">First</option>
-            <option value="Second">Second</option>
-            <option value="Final">Final</option>
+            <option value="1st">1st</option>
+            <option value="2nd">2nd</option>
+            <option value="3rd">3rd</option>
+            <option value="4th">4th</option>
           </select>
           <select
             className="select"
             value={filters.fingerprintStatus}
             onChange={(e) =>
-              setFilters((prev) => ({
-                ...prev,
-                fingerprintStatus: e.target.value,
-              }))
+              setFilters({ ...filters, fingerprintStatus: e.target.value })
             }
           >
             <option value="">Fingerprint Status</option>
@@ -166,45 +104,32 @@ const AdminStudents = () => {
           <table className="table">
             <thead>
               <tr>
-                <th className="table-cell">Student ID</th>
-                <th className="table-cell">Student Name</th>
-                <th className="table-cell">Department</th>
+                <th className="table-cell">Registration ID</th>
+                <th className="table-cell">Name</th>
+                <th className="table-cell">Branch</th>
                 <th className="table-cell">Year</th>
                 <th className="table-cell">Email</th>
                 <th className="table-cell">Fingerprint Status</th>
               </tr>
             </thead>
             <tbody>
-              {filteredStudents.map((student, index) => (
+              {studentsData.map((student, index) => (
                 <tr key={index} className="table-row">
-                  <td className="table-cell">{student.id}</td>
+                  <td className="table-cell">{student.reg_id}</td>
                   <td className="table-cell">{student.name}</td>
-                  <td className="table-cell">{student.department}</td>
+                  <td className="table-cell">{student.branch}</td>
                   <td className="table-cell">{student.year}</td>
                   <td className="table-cell">{student.email}</td>
-                  <td className="table-cell">
-                    <EnrollButton
-                      studentId={student.id}
-                      fingerprintStatus={student.fingerprintStatus}
-                      onEnroll={handleEnroll}
-                    />
-                  </td>
+                  <td className="table-cell">{student.fingerprintStatus}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
       </div>
-
-      {showModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <p>{modalMessage}</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
 export default AdminStudents;
+

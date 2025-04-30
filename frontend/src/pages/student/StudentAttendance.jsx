@@ -1,59 +1,64 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import supabase from "../../supabase"; // Adjust if needed
 import StudentSidebar from "./StudentSidebar";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 const StudentAttendance = () => {
-  // Dummy data for subjects
-  const subjects = [
-    {
-      id: 1,
-      name: "Mathematics",
-      code: "MATH101",
-      attendancePercent: 85,
-      classesAttended: 34,
-      totalClasses: 40,
-    },
-    {
-      id: 2,
-      name: "Physics",
-      code: "PHYS102",
-      attendancePercent: 75,
-      classesAttended: 30,
-      totalClasses: 40,
-    },
-    {
-      id: 3,
-      name: "Chemistry",
-      code: "CHEM103",
-      attendancePercent: 90,
-      classesAttended: 36,
-      totalClasses: 40,
-    },
-    {
-      id: 4,
-      name: "Computer Science",
-      code: "CS104",
-      attendancePercent: 95,
-      classesAttended: 38,
-      totalClasses: 40,
-    },
-    {
-      id: 5,
-      name: "Biology",
-      code: "BIO105",
-      attendancePercent: 80,
-      classesAttended: 32,
-      totalClasses: 40,
-    },
-    {
-      id: 6,
-      name: "English",
-      code: "ENG106",
-      attendancePercent: 70,
-      classesAttended: 28,
-      totalClasses: 40,
-    },
-  ];
+  const [subjects, setSubjects] = useState([]);
+
+  useEffect(() => {
+    const fetchEnrolledClasses = async () => {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        console.error("Auth error:", authError?.message);
+        return;
+      }
+
+      // Fetch student's branch and year from profiles
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("branch, year")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError || !profile) {
+        console.error("Error fetching profile:", profileError?.message);
+        return;
+      }
+
+      const { branch, year } = profile;
+
+      // Fetch classes where branch and year match
+      const { data: classes, error: classesError } = await supabase
+        .from("classes")
+        .select("name, course_code")
+        .eq("branch", branch)
+        .eq("year", year);
+
+      if (classesError) {
+        console.error("Error fetching classes:", classesError.message);
+        return;
+      }
+
+      // Assign dummy attendance data
+      const subjectsWithAttendance = classes.map((cls, index) => ({
+        id: index + 1,
+        name: cls.name,
+        code: cls.course_code,
+        attendancePercent: 80 + (index % 5) * 5, // dummy
+        classesAttended: 32 + (index % 3),        // dummy
+        totalClasses: 40,                         // dummy
+      }));
+
+      setSubjects(subjectsWithAttendance);
+    };
+
+    fetchEnrolledClasses();
+  }, []);
 
   return (
     <div style={styles.container}>
@@ -73,12 +78,10 @@ const StudentAttendance = () => {
                       {
                         name: "Attended",
                         value: subject.classesAttended,
-                        color: "#4CAF50",
                       },
                       {
                         name: "Missed",
                         value: subject.totalClasses - subject.classesAttended,
-                        color: "#FF5722",
                       },
                     ]}
                     dataKey="value"
@@ -88,8 +91,8 @@ const StudentAttendance = () => {
                     outerRadius={50}
                     label
                   >
-                    <Cell key="attended" fill="#4CAF50" />
-                    <Cell key="missed" fill="#FF5722" />
+                    <Cell fill="#4CAF50" />
+                    <Cell fill="#FF5722" />
                   </Pie>
                   <Tooltip />
                 </PieChart>
@@ -125,7 +128,7 @@ const styles = {
   },
   content: {
     flexGrow: 1,
-    paddingBottom: "50px", // Space for the footer
+    paddingBottom: "50px",
     textAlign: "center",
     maxWidth: "1100px",
   },
@@ -144,7 +147,6 @@ const styles = {
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
     paddingBottom: "20px",
     textAlign: "center",
-    transition: "transform 0.2s",
   },
   button: {
     marginTop: "10px",
@@ -159,3 +161,4 @@ const styles = {
 };
 
 export default StudentAttendance;
+

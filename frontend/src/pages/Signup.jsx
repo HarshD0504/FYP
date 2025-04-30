@@ -219,7 +219,7 @@ const SignUp = () => {
         </div>
         <button type="submit" style={styles.button}>Sign Up</button>
       </form>
-      <p>
+      <p style={styles.linkContainer}>
         Already have an account?{" "}
         <Link to="/login" style={styles.link}>
           Log In
@@ -232,7 +232,7 @@ const SignUp = () => {
 
 const styles = {
   container: { textAlign: "center" },
-  heading: { fontSize: "2rem", color: "#4CAF50" },
+  heading: { fontSize: "2rem", color: "#4CAF50", margin: "3rem", marginBottom: "0.5rem" },
   form: { display: "flex", flexDirection: "column", alignItems: "center" },
   input: {
     margin: "0.5rem",
@@ -252,6 +252,11 @@ const styles = {
     cursor: "pointer",
   },
   link: { color: "#4CAF50", textDecoration: "none" },
+
+  linkContainer: {
+  marginTop: "0.8rem",
+  marginBottom: "3.5rem",
+},
 };
 
 export default SignUp;

@@ -106,7 +106,7 @@ const styles = {
   },
   cardTitle: {
     fontSize: "1.2rem",
-    color: "#4CAF50",
+    color: "000",
     marginBottom: "10px",
     textAlign: "center"
   },
