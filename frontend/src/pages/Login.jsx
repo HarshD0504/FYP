@@ -6,6 +6,7 @@ import teacherIcon from "../assets/teacher.png";
 import adminIcon from "../assets/admin.png";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import { useEffect } from "react";
 
 const Login = () => {
   const [userType, setUserType] = useState(""); // Track selected user type
@@ -45,6 +46,18 @@ const Login = () => {
   const handleUserTypeSelection = (type) => {
     setUserType(type); // Set the user type and proceed to the login form
   };
+
+useEffect(() => {
+  const logoutIfAuthenticated = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.auth.signOut();
+    }
+  };
+
+  logoutIfAuthenticated();
+}, []);
+
 
   return (
     <div>
@@ -96,7 +109,7 @@ const Login = () => {
             <form onSubmit={handleSubmit} style={styles.form}>
               <input
                 type="text"
-                placeholder="Email/Phone/Username"
+                placeholder="Email"
                 value={emailOrPhone}
                 onChange={(e) => setEmailOrPhone(e.target.value)}
                 style={styles.input}

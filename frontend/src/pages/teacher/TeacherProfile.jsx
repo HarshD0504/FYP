@@ -55,9 +55,9 @@ const TeacherProfile = () => {
         name: profile.name,
         id: profile.reg_id,
         email: profile.email,
-        imageUrl: profile.image || "", // <- FETCH the uploaded image
+        imageUrl: profile.image || "",
         courses: courses,
-        fingerprintEnrolled: false,
+        fingerprintEnrolled: profile.fing_id !== null,
       });
 
       if (profile.image) {
@@ -136,22 +136,21 @@ const TeacherProfile = () => {
               <strong>Email:</strong> {teacher.email}
             </div>
 
-            <div style={styles.fingerprintStatus}>
-              <strong>Fingerprint Status:</strong>{" "}
-              {teacher.fingerprintEnrolled ? (
-                <span style={styles.enrolled}>Enrolled</span>
-              ) : (
-                <span style={styles.notEnrolled}>
-                  Not Enrolled.{" "}
-                  <button
-                    style={styles.contactButton}
-                    onClick={() => alert("Contacting Admin...")}
-                  >
-                    Contact Admin
-                  </button>
-                </span>
-              )}
-            </div>
+            <div
+  style={{
+    ...styles.fingerprintStatus,
+    borderColor: teacher.fingerprintEnrolled ? "#4CAF50" : "#FF5722",
+    backgroundColor: teacher.fingerprintEnrolled ? "#e8f5e9" : "#f5f5f5",
+  }}
+>
+  <strong>Fingerprint Status:</strong>{" "}
+  <span
+    style={teacher.fingerprintEnrolled ? styles.enrolled : styles.notEnrolled}
+  >
+    {teacher.fingerprintEnrolled ? "Enrolled" : "Not Enrolled"}
+  </span>
+</div>
+
 
             {/* Courses */}
             <div style={styles.tableContainer}>
@@ -250,16 +249,6 @@ const styles = {
     color: "#FF5722",
     fontWeight: "bold",
   },
-  contactButton: {
-    marginLeft: "10px",
-    padding: "5px 10px",
-    fontSize: "0.9rem",
-    color: "#fff",
-    backgroundColor: "#FF5722",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "pointer",
-  },
   subheading: {
     fontSize: "1.2rem",
     marginBottom: "10px",
@@ -308,6 +297,7 @@ const styles = {
 };
 
 export default TeacherProfile;
+
 
 
 

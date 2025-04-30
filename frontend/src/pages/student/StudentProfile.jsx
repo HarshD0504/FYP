@@ -45,7 +45,7 @@ const StudentProfile = () => {
         email: profile.email,
         branch: profile.branch || "N/A",
         year: profile.year,
-        fingerprintEnrolled: false,
+        fingerprintEnrolled: profile.fing_id !== null,
         courses: [],
       });
 
@@ -131,22 +131,21 @@ const StudentProfile = () => {
             <div style={styles.detailBox}>
               <strong>Year:</strong> {student.year}
             </div>
-            <div style={styles.fingerprintStatus}>
-              <strong>Fingerprint Status:</strong>{" "}
-              {student.fingerprintEnrolled ? (
-                <span style={styles.enrolled}>Enrolled</span>
-              ) : (
-                <span style={styles.notEnrolled}>
-                  Not Enrolled{" "}
-                  <button
-                    style={styles.contactButton}
-                    onClick={() => alert("Contacting Admin...")}
-                  >
-                    Contact Admin
-                  </button>
-                </span>
-              )}
-            </div>
+            <div
+  style={{
+    ...styles.fingerprintStatus,
+    borderColor: student.fingerprintEnrolled ? "#4CAF50" : "#FF5722",
+    backgroundColor: student.fingerprintEnrolled ? "#e8f5e9" : "#f5f5f5",
+  }}
+>
+  <strong>Fingerprint Status:</strong>{" "}
+  <span
+    style={student.fingerprintEnrolled ? styles.enrolled : styles.notEnrolled}
+  >
+    {student.fingerprintEnrolled ? "Enrolled" : "Not Enrolled"}
+  </span>
+</div>
+
           </div>
 
           {/* Right Side: Profile Picture */}
@@ -224,16 +223,6 @@ const styles = {
     color: "#FF5722",
     fontWeight: "bold",
   },
-  contactButton: {
-    marginLeft: "10px",
-    padding: "5px 10px",
-    fontSize: "0.9rem",
-    color: "#fff",
-    backgroundColor: "#FF5722",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "pointer",
-  },
   profilePictureWrapper: {
     width: "150px",
     height: "200px",
@@ -260,6 +249,7 @@ const styles = {
 };
 
 export default StudentProfile;
+
 
 
 
