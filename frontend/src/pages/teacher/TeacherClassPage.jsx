@@ -8,7 +8,7 @@ import "../../css/TeacherClassPage.css";
 function TeacherClassPage() {
   const { id } = useParams();
   const location = useLocation();
-  const { name, description } = location.state || {};
+  const { name, course_code } = location.state || {};
   const navigate = useNavigate();
 
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
@@ -84,7 +84,7 @@ function TeacherClassPage() {
 
     const { error } = await supabase
       .from("notices")
-      .insert([{ class_id: id, content: noticeContent, course_code: description }]);
+      .insert([{ class_id: id, content: noticeContent, course_code: course_code }]);
 
     if (error) {
       console.error("Error posting notice:", error.message);
@@ -137,7 +137,7 @@ function TeacherClassPage() {
             content: assignmentContent,
             file_url: publicUrl,
             due_date: dueDate ? new Date(dueDate).toISOString() : null,
-            course_code: description // Here you are saving the course code
+            course_code: course_code // Here you are saving the course code
           },
         ]);
   
@@ -154,7 +154,7 @@ function TeacherClassPage() {
           file_url: publicUrl,
           created_at: new Date().toISOString(),
           due_date: dueDate ? new Date(dueDate).toISOString() : null,
-          course_code: description, // Make sure the course code is added to the assignment object
+          course_code: course_code, // Make sure the course code is added to the assignment object
         },
         ...prev,
       ]);
@@ -172,7 +172,7 @@ function TeacherClassPage() {
     <div className="class-app-container">
       <nav className="dashboard">
         <h1 className="dashboard-title">
-          {name ? `${name} - ${description}` : `Class ${id}`}
+          {name ? `${name} - ${course_code}` : `Class ${id}`}
         </h1>
         <button className="dots-button" onClick={toggleOptions}>
           <BsThreeDotsVertical className="three-dots-icon" />

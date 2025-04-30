@@ -32,7 +32,7 @@ const TeacherAttendance = () => {
       // Fetch the courses assigned to the teacher based on their reg_id
       const { data: courses, error: coursesError } = await supabase
         .from("classes")
-        .select("name, description, year, branch") // Fetch course name, description (code), year, and branch
+        .select("name, course_code, year, branch") // Fetch course name, course_code (code), year, and branch
         .eq("reg_id", profile.reg_id);
 
       if (coursesError) {
@@ -59,7 +59,7 @@ const TeacherAttendance = () => {
             teacherCourses.map((course, index) => (
               <div key={index} style={styles.card}>
                 <h4 style={styles.cardTitle}>{course.name}</h4> {/* Course Name */}
-                <p style={styles.courseCode}>Code: {course.description}</p> {/* Course Code */}
+                <p style={styles.courseCode}>Code: {course.course_code}</p> {/* Course Code */}
                 <p style={styles.details}>Branch: {course.branch}</p> {/* Course Branch */}
                 <p style={styles.details}>Year: {course.year}</p> {/* Course Year */}
                 <button

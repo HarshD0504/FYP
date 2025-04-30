@@ -5,7 +5,7 @@ import supabase from "../../supabase";
 function StudentClassPage() {
   const { id } = useParams();
   const location = useLocation();
-  const { name, description } = location.state || {};
+  const { name, course_code } = location.state || {};
   const navigate = useNavigate();
 
   const [assignments, setAssignments] = useState([]);
@@ -53,7 +53,7 @@ function StudentClassPage() {
     <div className="class-app-container">
       <nav className="dashboard">
         <h1 className="dashboard-title">
-          {name ? `${name} - ${description}` : `Class ${id}`}
+          {name ? `${name} - ${course_code}` : `Class ${id}`}
         </h1>
       </nav>
 
