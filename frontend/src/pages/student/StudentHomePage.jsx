@@ -84,10 +84,10 @@ function StudentHomePage() {
                 <div className="class-card-header">
                   <h2>{cls.name}</h2>
                 </div>
-                <p>{cls.description}</p>
+                <p>{cls.course_code}</p>
                 <Link
                   to={`/student/classroom/class/${cls.id}`}
-                  state={{ name: cls.name, description: cls.description }}
+                  state={{ name: cls.name, course_code: cls.course_code }}
                   className="class-link"
                 >
                   View Class →
@@ -153,7 +153,7 @@ const styles = {
     margin: 0,
     color: "#333",
   },
-  classDescription: {
+  classcourse_code: {
     flexGrow: 1,
     fontSize: "0.95rem",
     color: "#666",

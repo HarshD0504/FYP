@@ -19,7 +19,7 @@ function TeacherAssignmentPage() {
 
       const { data, error } = await supabase
         .from("classes")
-        .select("name, description")
+        .select("name, course_code")
         .eq("id", classId)
         .single();
 
@@ -72,7 +72,7 @@ function TeacherAssignmentPage() {
       <nav className="dashboard">
         <h1 className="dashboard-title">
           {classInfo.name
-            ? `${classInfo.name} - ${classInfo.description}`
+            ? `${classInfo.name} - ${classInfo.course_code}`
             : `Class ${classId}`}
         </h1>
         <button className="dots-button">

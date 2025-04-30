@@ -76,7 +76,7 @@ function TeacherHomePage() {
     if (classCode.trim() && className.trim() && teacherRegId) {
       const { data, error } = await supabase
         .from("classes")
-        .insert([{ name: className, description: classCode, reg_id: teacherRegId }])
+        .insert([{ name: className, course_code: classCode, reg_id: teacherRegId }])
         .select();
 
       if (error) {
@@ -138,10 +138,10 @@ function TeacherHomePage() {
                     )}
                   </div>
                 </div>
-                <p>{cls.description}</p>
+                <p>{cls.course_code}</p>
                 <Link
                   to={`/teacher/classroom/class/${cls.id}`}
-                  state={{ name: cls.name, description: cls.description }}
+                  state={{ name: cls.name, course_code: cls.course_code }}
                   className="class-link"
                 >
                   View Class →

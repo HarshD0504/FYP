@@ -43,11 +43,11 @@ const TeacherProfile = () => {
 
       const { data: coursesData } = await supabase
         .from("classes")
-        .select("name, description")
+        .select("name, course_code")
         .eq("reg_id", profile.reg_id);
 
       const courses = coursesData?.map((course) => ({
-        code: course.description,
+        code: course.course_code,
         name: course.name,
       })) || [];
 
