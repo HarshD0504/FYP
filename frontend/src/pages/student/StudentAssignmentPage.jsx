@@ -81,7 +81,7 @@ function StudentAssignmentPage() {
     setSelectedFile(e.target.files[0]);
   };
 
-  const handleFileUpload = async () => {
+  /*const handleFileUpload = async () => {
     if (!selectedFile) return;
   
     setUploading(true);
@@ -141,7 +141,78 @@ if (submissionError) {
     }
   
     setUploading(false);
+  };*/
+
+  const handleFileUpload = async () => {
+    if (!selectedFile) return;
+  
+    setUploading(true);
+  
+    const fileName = `${regId}-${selectedFile.name}`;
+    const filePath = `${classId}/${fileName}`;
+  
+    // Upload file to Supabase storage
+    const { data, error } = await supabase.storage
+      .from("assignments")
+      .upload(filePath, selectedFile);
+  
+    if (error) {
+      console.error("Error uploading file:", error.message);
+      setUploading(false);
+      return;
+    }
+  
+    console.log("File uploaded successfully:", data);
+  
+    // Generate public URL for the uploaded file
+    const { data: publicUrlData, error: urlError } = supabase.storage
+      .from("assignments")
+      .getPublicUrl(data.path);
+  
+    if (urlError) {
+      console.error("Error generating public URL:", urlError.message);
+      setUploading(false);
+      return;
+    }
+  
+    const fullFileUrl = publicUrlData.publicUrl;
+  
+    // After successful upload, set fileUploaded to true
+    setFileUploaded(true);
+  
+    // Update the file URL in the "assignments" table or wherever necessary
+    const { error: updateError } = await supabase
+      .from("assignments")
+      .update({ file_url: fullFileUrl })  // Use full URL here
+      .eq("id", id);
+  
+    if (updateError) {
+      console.error("Error updating file URL in assignments table:", updateError.message);
+      setUploading(false);
+      return;
+    }
+  
+    // Now update the assignments_submissions table with full URL
+    const { error: submissionError } = await supabase
+      .from("assignment_submissions")
+      .upsert({
+        assignment_id: id,
+        reg_id: regId,
+        file_url: fullFileUrl,     // Use full URL here too
+        course_code: course_code,
+        class_id: classId,
+        created_at: new Date().toISOString(),
+      });
+  
+    if (submissionError) {
+      console.error("Error updating assignment_submissions table:", submissionError.message);
+    } else {
+      console.log("Assignment submission updated successfully.");
+    }
+  
+    setUploading(false);
   };
+  
   
   const renderFilePreview = (url) => {
     if (!url) return null;
