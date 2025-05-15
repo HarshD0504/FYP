@@ -25,12 +25,12 @@ const AdminSidebar = () => {
               Students
             </Link>
           </li>
-          <li style={styles.navLink}>
+          {/* <li style={styles.navLink}>
             <Link to="/admin/subjects" style={styles.link}>
               <FaBook style={styles.icon} />
               Subjects
             </Link>
-          </li>
+          </li> */}
           {/* <li style={styles.navLink}>
             <Link to="/admin/classes" style={styles.link}>
               <FaChalkboardTeacher style={styles.icon} />
@@ -43,18 +43,18 @@ const AdminSidebar = () => {
               Notices
             </Link>
           </li>
-          <li style={styles.navLink}>
+          {/* <li style={styles.navLink}>
             <Link to="/admin/complaints" style={styles.link}>
               <FaClipboardList style={styles.icon} />
               Complaints
             </Link>
-          </li>
-          <li style={styles.navLink}>
+          </li> */}
+          {/* <li style={styles.navLink}>
             <Link to="/admin/profile" style={styles.link}>
               <FaUserCircle style={styles.icon} />
               Profile
             </Link>
-          </li>
+          </li> */}
           <li style={styles.navLink}>
             <Link to="/" style={styles.link}>
               <FaSignOutAlt style={styles.icon} />
